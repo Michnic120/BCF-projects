@@ -1,0 +1,32 @@
+#include<iostream>
+#include<string>
+#include<vector>
+
+using namespace std;
+
+int main()
+{
+  vector<char> code, guess, hints(4,0);
+  char n;
+  
+  code.reserve(4); guess.reserve(4);
+  
+  cout<<"Enter the matrix\nr - red\nblue\ngreen\nyellow\nviolet\norange";
+  for(int i=0;i<4;)
+   {cin>>n;
+    if(n=='r' || n=='b' || n=='g' || n=='y' || n=='v' || n=='o')
+        {code.push_back(n);i++;}
+    else cout<<"Try again";
+   }
+   
+    for(int i=0;i<10;)
+   {cin>>n;
+    if(n=='r' || n=='b' || n=='g' || n=='y' || n=='v' || n=='o')
+        {guess.push_back(n);i++;}
+    else cout<<"Try again";
+   
+   if
+   
+   }
+   
+}
