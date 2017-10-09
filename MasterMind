@@ -7,44 +7,45 @@ using namespace std;
 int main()
 {
   vector<char> code = {'r','r','v','v'} , guess, hints;
-  char c; short m=0, n=0, g;
+  vector<bool> h(4,0);        // h - wskazówka, która pozycja jest odgadnięta
+  char c; short m, n=0, g;   //c - znak wprowadzany, m - licznik trafień, n - licznik okrążeń, g - doliczacz trafionych kolorów
 
   code.reserve(4); guess.reserve(4), hints.reserve(4);
 
 cout<<"Enter the color\nr - red\nb - blue\ng - green\ny - yellow\nv - violet\no - orange\n   hints :   ";
 
             for(int i=0;i<4;i++) cout<<hints[i];
-cout<<endl;
+            cout<<endl;
+
 
 while(n<10)  // || n>10
     {
+      m=0;
       for(int i=0;i<4;)
        {
         cin>>c;
-        if(c=='r' || c=='b' || c=='g' || c=='y' || c=='v' || c=='o'){guess.push_back(c);i++;}
+        if(c=='r' || c=='b' || c=='g' || c=='y' || c=='v' || c=='o'){guess[i]=c; i++;}
         else cout<<"Wrong color!"<<endl;
        }
 
       for(int i=0;i<4;i++)
         {
-          if(guess[i] == code[i]) {hints[m] ='O';  m++;}
+          if(guess[i] == code[i]) {hints[m] ='O'; h[m] = true; m++;}
         }
-        g=m;
+      g=m;
 
-       for(int i=0;i<4;i++)
+       for(int i=0;i<4 && i!=;i++)
           for(int j=0;j<4;j++)
-            if(i!=j) if(guess[i] == code[j]) {hints[g]='o'; g++;}
+            if(i!=j && guess[i]==code[j]) {hints[g]='o'; g++;}
 
-    for(int i=0;i<4;i++)  if(hints[i]!= 'o' && hints[i]!= 'O') hints[i]='.';
+       for(int i=0;i<4;i++)  if(hints[i]!= 'o' && hints[i]!= 'O') hints[i]='.';
 
        if(m==4) break;
 
         for(int i=0;i<4;i++) {cout<<hints[i];hints[i]='.';}
         cout<<endl<<"Try again"<<endl;
-        guess.clear(); hints.clear();
-
-
-        n++; m=0;
+        h.clear();
+        n++;
     }
 
 }
