@@ -1,33 +1,63 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <string.h>
+#include <string>
 #include <iostream>
-#include <stdlib.h>
-#include <conio.h>
+#include <vector>
 #include <cstdlib>
 #include <windows.h>
+#include <stdlib.h>
+#include <conio.h>
+
 #include "Pokoj.h"
 #include "Sched.h"
 #include "Sterownik.h"
 
 using namespace std;
-
 VOID WINAPI Sleep(DWORD dwMilliseconds);
 
 int main()
 {
-  int t1, t2, t3, t4, t5;
-  cout << "Podaj temperature w kazdym z pomieszczen" << endl;
-  cout << "Poddasze: "; cin >> t1;
-  cout << "Salon: "; cin >> t2;
-  cout << "Sypialnia: "; cin >> t3;
-  cout << "Garaz: "; cin >> t4;
-  cout << "Piwnica: "; cin >> t5;
-  
-  CKlima k1,k2,k3,k4,k5;
-  CPokoj poddasze(&k1, 0.1, 0.1), salon(&k2, 0.3, 0.07), sypialnia(&k3, 0.3, 0.07),garaz(&k4, 0.3, 0.02), piwnica(&k5, 0.6, 0.02);
-  CSterownik s1(&k1, &poddasze, t1), s2(&k2, &salon, t2), s3(&k3, &sypialnia, t3),s4(&k4, &garaz, t4), s5(&k5, &piwnica, t5);
-  CSched shed(&poddasze, &s1, &salon, &s2, &sypialnia, &s3, &garaz, &s4, &piwnica, &s5,1000);
-  
-  shed.uruchamiacz();
-  return 0;
+	CPokoj pok_buffer;
+	vector<CKlima> klima(5);
+    vector<CPokoj> pokoje(5);
+    vector<int> tem(5);
+	
+	vector<CPokoj>::size_type sz_pok = pokoje.size();
+
+	for(short i=0; i<sz_pok; i++)
+        {
+            pok_buffer.klima1=&klima[i];
+            pok_buffer.minus =i/0.1;
+            pok_buffer.plus =i/0.01;
+            pokoje.push_back(pok_buffer);
+        }
+        
+
+	CPokoj  poddasze (&klima[0], 0.1, 0.01),
+            salon    (&klima[1], 0.3, 0.07),
+            sypialnia(&klima[2], 0.3, 0.07),
+            garaz    (&klima[3], 0.3, 0.02),
+            piwnica  (&klima[4], 0.6, 0.02);
+
+
+	//vector<int>::size_type sz_tem = tem.size();
+	//for(short i=0; i<sz_tem; i++){}
+
+	cout  << "Podaj temperature w kazdym z pomieszczen" << endl<<endl;
+	cout  << "Poddasze:  "; cin >> tem[0];
+	cout  << "Salon:     "; cin >> tem[1];
+	cout  << "Sypialnia: "; cin >> tem[2];
+	cout  << "Garaz:     "; cin >> tem[3];
+	cout  << "Piwnica:   "; cin >> tem[4];
+
+	CSterownik  s1(&klima[0], &poddasze,  tem[0]),
+                s2(&klima[1], &salon,     tem[1]),
+                s3(&klima[2], &sypialnia, tem[2]),
+                s4(&klima[3], &garaz,     tem[3]),
+                s5(&klima[4], &piwnica,   tem[4]);
+
+	CSched shed(&poddasze, &s1, &salon, &s2, &sypialnia, &s3, &garaz, &s4, &piwnica, &s5, 1000);
+
+	shed.uruchamiacz();
+
+	return 0;
 }
