@@ -18,6 +18,7 @@ CPokoj::CPokoj(CKlima * klimka, float zmn, float zw, short num)
   klima1 = klimka;
   plus = zw;
   minus = zmn;
+  numer = num;
   
 }
 
