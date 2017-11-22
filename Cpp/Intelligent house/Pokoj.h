@@ -7,7 +7,7 @@ private:
   double dAktualnaTem;
 public:
   CPokoj();
-  CPokoj(CKlima *klimka, float zmn, float zw, short numer);
+  CPokoj(CKlima *klimka, float zmn, float zw, short num);
   ~CPokoj();
    
   CKlima *klima1;
