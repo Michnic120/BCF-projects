@@ -12,12 +12,13 @@ CPokoj::CPokoj()
   dAktualnaTem = 18;
 }
 
-CPokoj::CPokoj(CKlima * klimka, float zmn, float zw)
+CPokoj::CPokoj(CKlima * klimka, float zmn, float zw, short num)
 {
   dAktualnaTem = 18;
   klima1 = klimka;
   plus = zw;
   minus = zmn;
+  
 }
 
 CPokoj::~CPokoj()
