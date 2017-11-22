@@ -7,9 +7,11 @@ private:
   double dAktualnaTem;
 public:
   CPokoj();
-  CPokoj(CKlima *klimka, float zmn, float zw);
+  CPokoj(CKlima *klimka, float zmn, float zw, short numer);
   ~CPokoj();
-   CKlima *klima1;
+   
+  CKlima *klima1;
+  short numer;
   float plus, minus;
   void ZmienTem();
   double DajTem();
