@@ -11,24 +11,29 @@ facets
      val range  
         < 1, 5 >;
 
-
   pytanie_2 :
      ask     yes
      single  yes
      val oneof  
      { 
         "tak",
-        "nie"
+	"nie"
      };
 
+  pytanie_3 :
+     ask     yes
+     single  yes
+     val range  
+        < 1, 2e+05 >;
 
-  pytanie_4 :
+ pytanie_4 :
      ask     yes
      single  yes
      val oneof  
      { 
         "mniejsze, ekonomiczniejsze auto",
-        "większe i komfortowe, ale mniej ekonomiczne auto  "
+        "większe i komfortowe, ale mniej ekonomiczne auto  ",
+	"nic"
      };
 
   pytanie_5 :
@@ -40,15 +45,16 @@ facets
         "nieco większy kompakt"
      };
 
+
   rodzaj_auta :
      ask     yes
      single  yes
      val oneof  
      { 
-        "Toyota AYGO od 34.000 zł",
+        "brak auta",
+	"Toyota AYGO od 34.000 zł",
         "Toyota Yaris od 37.000zł ",
         "Toyota Yaris od 37.000zł lub VW Polo od 40.000zł",
-        "brak auta",
         "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł",
         "Toyota Corolla od 60.000zł",
         "Toyota Corolla od 60.000zł lub VW Jetta od 72.000zł",
@@ -57,11 +63,7 @@ facets
         "Toyota AYGO od 34.000 zł, Ford Ka od 38.000zł lub VW Up! od 40.000zł"
      };
 
-  pytanie_3 :
-     ask     yes
-     single  yes
-     val range  
-        < 1, 2e+05 >;
+
 
 end; // facets
 
@@ -93,24 +95,10 @@ rules
              & pytanie_2 = "nie" 
              & pytanie_1 = 5;
 
-   0006: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł " if
-             pytanie_5 = "nieco większy kompakt" 
-             & ( pytanie_3 >= 37000 
-             & pytanie_3 < 40000 ) 
-             & pytanie_2 = "nie" 
-             & pytanie_1 < 5;
-
    0007: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł " if
              ( pytanie_3 >= 37000 
              & pytanie_3 < 40000 ) 
              & pytanie_2 = "tak" 
-             & pytanie_1 < 5;
-
-   0008: rodzaj_auta ( auto ) = "Toyota AYGO od 34.000 zł" if
-             pytanie_5 = "typowo miejskie, zwinne auto" 
-             & ( pytanie_3 >= 37000 
-             & pytanie_3 < 38000 ) 
-             & pytanie_2 = "nie" 
              & pytanie_1 < 5;
 
    0009: rodzaj_auta ( auto ) = "Toyota AYGO od 34.000 zł" if
@@ -119,32 +107,11 @@ rules
              & pytanie_2 = "nie" 
              & pytanie_1 < 5;
 
-   0010: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł" if
-             pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
-             & ( pytanie_3 >= 60000 
-             & pytanie_3 < 72000 ) 
-             & pytanie_2 = "nie"
-             & pytanie_1 = 5;
-
    0011: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł" if
              ( pytanie_3 >= 60000 
              & pytanie_3 < 72000 ) 
              & pytanie_2 = "tak" 
              & pytanie_1 = 5;
-
-   0012: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł" if
-             pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
-             & pytanie_3 >= 60000 
-             & pytanie_3 < 72000 
-             & pytanie_2 = "nie" 
-             & pytanie_1 < 5;
-
-   0013: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł" if
-             pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
-             & pytanie_3 >= 60000 
-             & pytanie_3 < 72000 
-             & pytanie_2 = "tak" 
-             & pytanie_1 < 5;
 
    0014: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł lub VW Polo od 40.000zł" if
              pytanie_3 >= 40000 
@@ -158,18 +125,49 @@ rules
              & pytanie_2 = "tak" 
              & pytanie_1 < 5;
 
-   0016: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł lub VW Polo od 40.000zł" if
-             pytanie_5 = "nieco większy kompakt" 
-             & pytanie_3 >= 40000 
-             & pytanie_3 < 45000 
-             & pytanie_2 = "nie"
-             & pytanie_1 < 5;
-
    0017: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
              pytanie_3 >= 45000 
              & pytanie_3 < 60000 
              & pytanie_2 = "nie" 
              & pytanie_1 = 5;
+
+   0022: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
+             pytanie_3 >= 45000 
+             & pytanie_3 < 60000 
+             & pytanie_2 = "tak" 
+             & pytanie_1 < 5;
+
+   0024: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł lub VW Jetta od 72.000zł" if
+             pytanie_3 >= 72000 
+             & pytanie_3 < 95000 
+             & pytanie_2 = "tak" 
+             & pytanie_1 = 5;
+
+   0028: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł, VW Jetta od 72.000zł lub Ford Mondeo od 95.000zł" if
+             pytanie_3 >= 95000 
+             & pytanie_2 = "tak"
+             & pytanie_1 = 5;
+
+   0010: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł" if
+             pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
+             & ( pytanie_3 >= 60000 
+             & pytanie_3 < 72000 ) 
+             & pytanie_2 = "nie"
+             & pytanie_1 = 5;
+
+   0012: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł" if
+             pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
+             & (pytanie_3 >= 60000 
+             & pytanie_3 < 72000 )
+             & pytanie_2 = "nie" 
+             & pytanie_1 < 5;
+
+   0013: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł" if
+             pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
+             & (pytanie_3 >= 60000 
+             & pytanie_3 < 72000 )
+             & pytanie_2 = "tak" 
+             & pytanie_1 < 5;
 
    0018: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
              pytanie_4 = "mniejsze, ekonomiczniejsze auto" 
@@ -177,29 +175,9 @@ rules
              & pytanie_2 = "nie" 
              & pytanie_1 = 5;
 
-   0019: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
-             pytanie_5 = "nieco większy kompakt" 
-             & pytanie_4 = "mniejsze, ekonomiczniejsze auto" 
-             & pytanie_3 >= 60000 
-             & pytanie_2 = "nie" 
-             & pytanie_1 < 5;
-
-   0020: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
-             pytanie_5 = "nieco większy kompakt" 
-             & pytanie_3 >= 45000 
-             & pytanie_3 < 60000 
-             & pytanie_2 = "nie" 
-             & pytanie_1 < 5;
-
    0021: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
              pytanie_4 = "mniejsze, ekonomiczniejsze auto" 
              & pytanie_3 >= 60000 
-             & pytanie_2 = "tak" 
-             & pytanie_1 < 5;
-
-   0022: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
-             pytanie_3 >= 45000 
-             & pytanie_3 < 60000 
              & pytanie_2 = "tak" 
              & pytanie_1 < 5;
 
@@ -210,16 +188,10 @@ rules
              & pytanie_2 = "nie" 
              & pytanie_1 = 5;
 
-   0024: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł lub VW Jetta od 72.000zł" if
-             pytanie_3 >= 72000 
-             & pytanie_3 < 95000 
-             & pytanie_2 = "tak" 
-             & pytanie_1 = 5;
-
    0025: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł lub VW Jetta od 72.000zł" if
              pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
-             & pytanie_3 >= 72000 
-             & pytanie_3 < 95000 
+             & (pytanie_3 >= 72000 
+             & pytanie_3 < 95000 )
              & pytanie_2 = "nie" 
              & pytanie_1 < 5;
 
@@ -236,11 +208,6 @@ rules
              & pytanie_2 = "nie" 
              & pytanie_1 = 5;
 
-   0028: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł, VW Jetta od 72.000zł lub Ford Mondeo od 95.000zł" if
-             pytanie_3 >= 95000 
-             & pytanie_2 = "tak"
-             & pytanie_1 = 5;
-
    0029: rodzaj_auta ( auto ) = "Toyota Corolla od 60.000zł, VW Jetta od 72.000zł lub Ford Mondeo od 95.000zł" if
              pytanie_4 = "większe i komfortowe, ale mniej ekonomiczne auto  " 
              & pytanie_3 >= 95000 
@@ -253,11 +220,32 @@ rules
              & pytanie_2 = "tak" 
              & pytanie_1 < 5;
 
-   0031: rodzaj_auta ( auto ) = "Toyota AYGO od 34.000 zł, Ford Ka od 38.000zł lub VW Up! od 40.000zł" if
+   0006: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł " if
+             pytanie_5 = "nieco większy kompakt" 
+             & ( pytanie_3 >= 37000 
+             & pytanie_3 < 40000 ) 
+             & pytanie_2 = "nie" 
+             & pytanie_1 < 5;
+
+   0008: rodzaj_auta ( auto ) = "Toyota AYGO od 34.000 zł" if
              pytanie_5 = "typowo miejskie, zwinne auto" 
-             & pytanie_4 = "mniejsze, ekonomiczniejsze auto" 
-             & pytanie_3 >= 60000 
+             & ( pytanie_3 >= 37000 
+             & pytanie_3 < 38000 ) 
+             & pytanie_2 = "nie" 
+             & pytanie_1 < 5;
+
+   0016: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł lub VW Polo od 40.000zł" if
+             pytanie_5 = "nieco większy kompakt" 
+             & (pytanie_3 >= 40000 
+             & pytanie_3 < 45000 )
              & pytanie_2 = "nie"
+             & pytanie_1 < 5;
+
+   0020: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
+             pytanie_5 = "nieco większy kompakt" 
+             & pytanie_3 >= 45000 
+             & pytanie_3 < 60000 
+             & pytanie_2 = "nie" 
              & pytanie_1 < 5;
 
    0032: rodzaj_auta ( auto ) = "Toyota AYGO od 34.000 zł, Ford Ka od 38.000zł lub VW Up! od 40.000zł" if
@@ -274,21 +262,33 @@ rules
              & pytanie_2 = "nie"
              & pytanie_1 < 5;
 
+   0019: rodzaj_auta ( auto ) = "Toyota Yaris od 37.000zł, VW Polo od 40.000zł lub Ford Fiesta od 45.000zł" if
+             pytanie_5 = "nieco większy kompakt" 
+             & pytanie_4 = "mniejsze, ekonomiczniejsze auto" 
+             & pytanie_3 >= 60000 
+             & pytanie_2 = "nie" 
+             & pytanie_1 < 5;
+
+   0031: rodzaj_auta ( auto ) = "Toyota AYGO od 34.000 zł, Ford Ka od 38.000zł lub VW Up! od 40.000zł" if
+             pytanie_5 = "typowo miejskie, zwinne auto" 
+             & pytanie_4 = "mniejsze, ekonomiczniejsze auto" 
+             & pytanie_3 >= 60000 
+             & pytanie_2 = "nie"
+             & pytanie_1 < 5;
 
 end; // rules
 
 control
 
-// *********************************************
-// * Aplikacja uruchamiana w oknie, wyposażona *
-// * w menu sterujące i winietę informacyjną.  *
-// *********************************************
+
 
 // deklaracja zmiennych
 
 char Text1;
 char Text2;
 char Text3;
+
+int IloscOsob, Budzet, Indeks, Indeks2, Indeks3;
 
 // automatyczne uruchomienie aplikacji
 
@@ -319,8 +319,6 @@ char Text3;
  //pytanie 1
 
 
-int IloscOsob, Indeks, Budzet, Indeks2;
-
  neditBox(0, 0, 1, 5, "Podaj ilość osób w rodzinie", IloscOsob);
  addFact(_, pytanie_1, IloscOsob);
 
@@ -347,12 +345,253 @@ char FaktWakacje;
  addFact(_, pytanie_3, Budzet);
 
 
+
+//0001 
+
+if( Budzet < 37000 ) 
+begin
+ if(Wakacje[Indeks] == "nie") 
+ begin
+  if( IloscOsob == 5) 
+  begin
+   goal("rodzaj_auta(auto) = X");
+   break;
+end;
+end;
+end;
+
+
+//0002 
+
+if( Budzet < 60000 ) 
+begin
+ if(Wakacje[Indeks] == "tak" ) 
+ begin
+  if(IloscOsob == 5) 
+  begin
+   goal("rodzaj_auta(auto) = X");
+   break;
+end;
+end;
+end;
+
+
+//0003 
+
+if( Budzet < 34000 ) 
+begin
+ if(Wakacje[Indeks] == "nie") 
+ begin
+  if(  IloscOsob < 5) 
+  begin
+   goal("rodzaj_auta(auto) = X");
+   break;
+end;
+end;
+end;
+
+
+//0004 
+
+if(Budzet < 37000 ) 
+begin
+ if(  Wakacje[Indeks] == "tak") 
+ begin
+  if(  IloscOsob < 5) 
+  begin
+   goal("rodzaj_auta(auto) = X");
+   break;		
+end;
+end;
+end;
+
+
+//0005
+
+if( Budzet >= 37000 ) 
+begin
+ if( Budzet < 40000  ) 
+ begin
+  if( Wakacje[Indeks] == "nie" ) 
+  begin
+   if( IloscOsob == 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+
+//0007
+
+if( Budzet >= 37000 ) 
+begin
+ if( Budzet < 40000 ) 
+ begin
+  if( Wakacje[Indeks] == "tak" ) 
+  begin
+   if( IloscOsob < 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+
+//0009
+
+if( Budzet >= 34000 ) 
+begin
+ if( Budzet < 37000 ) 
+ begin
+  if( Wakacje[Indeks] == "nie" ) 
+  begin
+   if( IloscOsob < 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+//0011
+
+if(  Budzet >= 60000 ) 
+begin
+ if( Budzet < 72000 ) 
+ begin
+  if( Wakacje[Indeks] == "tak" ) 
+  begin
+   if( IloscOsob == 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+
+//0014
+
+if( Budzet >= 40000 ) 
+begin
+ if( Budzet < 45000 ) 
+ begin
+  if( Wakacje[Indeks] == "nie" ) 
+  begin
+   if( IloscOsob == 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+
+//0015
+
+if( Budzet >= 40000 ) 
+begin
+ if( Budzet < 45000 ) 
+ begin
+  if( Wakacje[Indeks] == "tak" ) 
+  begin
+   if( IloscOsob < 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+ 
+//0017
+
+if( Budzet >= 45000 ) 
+begin
+ if( Budzet < 60000 ) 
+ begin
+  if( Wakacje[Indeks] == "nie" ) 
+  begin
+   if( IloscOsob == 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+
+//0022
+
+if( Budzet >= 45000 ) 
+begin
+ if( Budzet < 60000  ) 
+ begin
+  if( Wakacje[Indeks] == "tak" ) 
+  begin
+   if( IloscOsob < 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;		
+end;
+end;
+end;
+end;
+
+
+//0024
+
+if(  Budzet < 95000  ) 
+begin
+  if( Budzet >= 72000 ) 
+ begin
+  if( Wakacje[Indeks] == "tak" ) 
+  begin
+   if( IloscOsob == 5 ) 
+   begin
+    goal("rodzaj_auta(auto) = X");
+    break;		
+end;
+end;
+end;
+end;
+
+
+//0028
+ 
+if( Wakacje[Indeks] == "tak" ) 
+begin
+ if( Budzet >= 95000 ) 
+ begin
+  if( IloscOsob == 5 ) 
+  begin
+   
+   goal("rodzaj_auta(auto) = X");
+   break;		
+end;
+end;
+end;
+
+
+
+
  //pytanie 4
 
 
-char Ekonomia[2];
+char Ekonomia[3];
 Ekonomia[0]:= "mniejsze, ekonomiczniejsze auto";
-Ekonomia[1]:= "większe i komfortowe, ale mniej ekonomiczne auto";
+Ekonomia[1]:= "większe i komfortowe, ale mniej ekonomiczne auto  ";
+Ekonomia[2]:= "nic";
 
 slistBox(0, 0, "Określenie potrzeb klienta", "Bardziej Ci zależy na samochodzie bardziej komfortowym czy ekonomiczniejszym?", Ekonomia, 2, Indeks2);
 
@@ -361,28 +600,388 @@ addFact(_, pytanie_4, Ekonomia[Indeks2]);
 char FaktEkonomia;
 
  catchFact(FaktEkonomia, _, "pytanie_4", "mniejsze, ekonomiczniejsze auto", 0);
- catchFact(FaktEkonomia, _, "pytanie_4", "większe i komfortowe, ale mniej ekonomiczne auto", 1);
+ catchFact(FaktEkonomia, _, "pytanie_4", "większe i komfortowe, ale mniej ekonomiczne auto  ", 1);
+ catchFact(FaktEkonomia, _, "pytanie_4", "nic", 2);
+
+
+//0010
+
+if( Ekonomia[Indeks2] = "większe i komfortowe, ale mniej ekonomiczne auto  " ) 
+begin
+ if( Budzet >= 60000  ) 
+ begin
+  if( Budzet < 72000 ) 
+  begin
+   if( Wakacje[Indeks] == "nie" ) 
+   begin
+    if( IloscOsob == 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+
+//0012
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  " ) 
+begin
+ if( Budzet >= 60000 ) 
+ begin
+  if( Budzet < 72000  ) 
+  begin
+   if( Wakacje[Indeks] == "nie" ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+
+//0013
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  "  ) 
+begin
+ if( Budzet >= 60000 ) 
+ begin
+  if( Budzet < 72000 ) 
+  begin
+   if( Wakacje[Indeks] == "tak" ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+//0018
+
+
+if( Ekonomia[Indeks2] == "mniejsze, ekonomiczniejsze auto" ) 
+begin
+ if( Budzet >= 60000 ) 
+ begin
+  if( Wakacje[Indeks] == "nie" ) 
+  begin
+   if( IloscOsob == 5 ) 
+   begin
+    goal("rodzaj_auta(auto) = X");
+    break;				
+end;
+end;
+end;
+end;
+
+//0021
+
+
+if( Ekonomia[Indeks2] == "mniejsze, ekonomiczniejsze auto"  ) 
+begin
+ if( Budzet >= 60000  ) 
+ begin
+  if( Wakacje[Indeks] == "tak"  ) 
+  begin
+   if( IloscOsob < 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+
+//0023
+
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  " ) 
+begin
+ if( Budzet >= 72000  ) 
+ begin
+  if( Budzet < 95000  ) 
+  begin
+   if( Wakacje[Indeks] == "nie"  ) 
+   begin
+    if( IloscOsob == 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+//0025
+
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  "  ) 
+begin
+ if( Budzet >= 72000 ) 
+ begin
+  if( Budzet < 95000 ) 
+  begin
+   if( Wakacje[Indeks] == "nie"  ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+   
+//0026
+
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  "  ) 
+begin
+ if( Budzet >= 72000  ) 
+ begin
+  if( Budzet < 95000  ) 
+  begin
+   if( Wakacje[Indeks] == "tak"  ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+             
+//0027
+
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  " ) 
+begin
+ if( Budzet >= 95000  ) 
+ begin
+  if( Wakacje[Indeks] == "nie" ) 
+  begin
+   if( IloscOsob == 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;       
+             
+
+//0029
+
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  " ) 
+begin
+ if( Budzet >= 95000  ) 
+ begin
+  if( Wakacje[Indeks] == "nie"  ) 
+  begin
+   if(  IloscOsob < 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;    
+
+
+//0030
+
+
+if( Ekonomia[Indeks2] == "większe i komfortowe, ale mniej ekonomiczne auto  " ) 
+begin
+ if( Budzet >= 95000  ) 
+ begin
+  if( Wakacje[Indeks] == "tak"  ) 
+  begin
+   if( IloscOsob < 5 ) 
+   begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+
+
+//0006
+
+if( Miejskie[Indeks3] = "nieco większy kompakt" ) 
+begin
+ if( Budzet >= 37000  ) 
+ begin
+  if( Budzet < 40000  ) 
+  begin
+   if( Wakacje[Indeks] == "nie" ) 
+   begin
+    if( IloscOsob < 5 ) 
+     begin
+      goal("rodzaj_auta(auto) = X");
+      break;				
+end;
+end;
+end;
+end;
+end;
+  
+
+
+//0008
+
+if( Miejskie[Indeks3] == "typowo miejskie, zwinne auto"  ) 
+begin
+ if( Budzet >= 37000  ) 
+ begin
+  if( Budzet < 38000  ) 
+  begin
+   if( Wakacje[Indeks] == "nie"  ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+
+//0016
+
+if( Miejskie[Indeks3] == "nieco większy kompakt" ) 
+begin
+ if( Budzet >= 40000 ) 
+ begin
+  if( Budzet < 45000 ) 
+  begin
+   if( Wakacje[Indeks] == "nie" ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+
+//0020
+
+if( Miejskie[Indeks3] == "nieco większy kompakt" ) 
+begin
+ if( Budzet >= 45000  ) 
+ begin
+  if( Budzet < 60000 ) 
+  begin
+   if( Wakacje[Indeks] == "nie" ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+
+//0032
+
+if( Miejskie[Indeks3] == "typowo miejskie, zwinne auto" ) 
+begin
+ if( Budzet >= 40000  ) 
+ begin
+  if( Budzet < 60000  ) 
+  begin
+   if( Wakacje[Indeks] == "nie" ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+
+//0033
+
+
+if( Miejskie[Indeks3] == "typowo miejskie, zwinne auto" ) 
+begin
+ if( Budzet >= 38000  ) 
+ begin
+  if( Budzet < 40000 ) 
+  begin
+   if( Wakacje[Indeks] == "nie" ) 
+   begin
+    if( IloscOsob < 5 ) 
+    begin
+     goal("rodzaj_auta(auto) = X");
+     break;				
+end;
+end;
+end;
+end;
+end;
+
+
+
+//pytanie_1, IloscOsob
+//pytanie_2, Wakacje[Indeks]
+//pytanie_3, Budzet
+//pytanie_4, Ekonomia[Indeks2]
+//pytanie_5, Miejskie[Indeks3]
+
+
+
 
 
 //pytanie 5
 
 
-char Miejskie[2];
+char Miejskie[3];
 Miejskie[0]:= "typowo miejskie, zwinne auto";
 Miejskie[1]:= "nieco większy kompakt";
 
-slistBox(0, 0, "Określenie potrzeb klienta", "Bardziej Ci zależy na samochodzie miejskim czy kompaktowym?", Miejskie, 2, Indeks);
 
-addFact(_, pytanie_5, Miejskie[Indeks]);
+slistBox(0, 0, "Określenie potrzeb klienta", "Bardziej Ci zależy na samochodzie miejskim czy kompaktowym?", Miejskie, 2, Indeks3);
+
+addFact(_, pytanie_5, Miejskie[Indeks3]);
 
 char FaktMiejskie;
 
  catchFact(FaktMiejskie, _, "pytanie_5", "typowo miejskie, zwinne auto", 0);
  catchFact(FaktMiejskie, _, "pytanie_5", "nieco większy kompakt", 1);	
-
  
-	
 
+goal("rodzaj_auta(auto) = X");
+ 
 	case 2:
 
 		exit;  // zamknięcie aplikacji
