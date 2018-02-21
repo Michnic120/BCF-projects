@@ -29,9 +29,13 @@ CPokoj::~CPokoj()
 void CPokoj::ZmienTem()
 {
   dAktualnaTem+=plus;
-  if (0 == klima1->DajStan()) {dAktualnaTem=dAktualnaTem;}
-  if (1 == klima1->DajStan()) {dAktualnaTem-=minus;}
-  if (0 != klima1->DajStan() && 1 != klima1->DajStan()) {cout << "Cos sie popsulo\n";}
+  
+  if (0 == klima1->DajStan()) 
+    dAktualnaTem=dAktualnaTem;
+  if (1 == klima1->DajStan()) 
+    dAktualnaTem-=minus;
+  if (0 != klima1->DajStan() && 1 != klima1->DajStan()) 
+    cout << "Cos sie popsulo\n";
 }
 
 double CPokoj::DajTem()
