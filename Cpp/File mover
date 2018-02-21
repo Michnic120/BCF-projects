@@ -25,31 +25,33 @@ try
       cerr<<"Could not move "<<str1<<" file."<<endl;
     }
 
-return GetLastError();
+ return GetLastError();
 }
 
 void ErrorList(int error)
 {
     switch(error)
     {
-    case 0:
-    break;
-    case 2:
-    cout<<"File not found. Try again."<<endl;
-    break;
+        case 0:
+        break;
+        case 2:
+        cout<<"File not found. Try again."<<endl;
+        break;
     }
     getch();
 }
 
+
  int main ()
 {
-int e;
-do
-{
-    e = Move();
-    ErrorList(e);
-}
-while(e!=0);
+    int e;
+    do
+    {
+        e = Move();
+        ErrorList(e);
+    }
+    
+    while(e!=0);
 
-return 0;
+    return 0;
 }
