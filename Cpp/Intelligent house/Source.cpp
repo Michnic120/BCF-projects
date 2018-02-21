@@ -7,48 +7,48 @@
 #include <stdlib.h>
 #include <conio.h>
 
-#include "Pokoj.h"
+#include "Room.h"
 #include "Sched.h"
-#include "Sterownik.h"
+#include "Controller.h"
 
 using namespace std;
 VOID WINAPI Sleep(DWORD dwMilliseconds);
 
 int main()
 {
-	CPokoj pok_buffer;
-	vector<CKlima> klima(5);
-   	vector<CPokoj> pokoje(5);
+	CRoom room_buffer;
+	vector<CAirConditioner> conds(5);
+   	vector<CRoom> rooms(5);
 	vector<int> tem(5);
-	vector<CPokoj>::size_type sz_pok = pokoje.size();
+	vector<CRoom>::size_type sz_room = rooms.size();
 
 	for(short i=0; i<sz_pok; i++)
         {
-            pok_buffer.klima1=&klima[i];
-            pok_buffer.minus =i/0.1;
-            pok_buffer.plus =i/0.01;
-            pok_buffer.numer = i;
-            pokoje.push_back(pok_buffer);
+            room_buffer.cond1=&cond[i];
+            room_buffer.minus =i/0.1;
+            room_buffer.plus =i/0.01;
+            room_buffer.number = i;
+            rooms.push_back(room_buffer);
         }
         
 
-	cout  << "Podaj temperature w kazdym z pomieszczen" << endl<<endl;
-	cout  << "Poddasze:  "; cin >> tem[0];
-	cout  << "Salon:     "; cin >> tem[1];
-	cout  << "Sypialnia: "; cin >> tem[2];
-	cout  << "Garaz:     "; cin >> tem[3];
-	cout  << "Piwnica:   "; cin >> tem[4];
+	cout  << "Set the temperature in every room" << endl<<endl;
+	cout  << "Attic:  "; cin >> tem[0];
+	cout  << "Living room:     "; cin >> tem[1];
+	cout  << "Bed room: "; cin >> tem[2];
+	cout  << "Garage:     "; cin >> tem[3];
+	cout  << "Cellar:   "; cin >> tem[4];
 
 
-	CSterownik  s1(&klima[0], &poddasze,  tem[0]),
-                s2(&klima[1], &salon,     tem[1]),
-                s3(&klima[2], &sypialnia, tem[2]),
-                s4(&klima[3], &garaz,     tem[3]),
-                s5(&klima[4], &piwnica,   tem[4]);
+	CSterownik s1(&cond[0], &attic,   tem[0]),
+                   s2(&cond[1], &livroom, tem[1]),
+                   s3(&cond[2], &bedroom, tem[2]),
+                   s4(&cond[3], &garage,  tem[3]),
+                   s5(&cond[4], &cellar,  tem[4]);
 
-	CSched shed(&poddasze, &s1, &salon, &s2, &sypialnia, &s3, &garaz, &s4, &piwnica, &s5, 1000);
+	CSched shed(&attic, &s1, &livroom, &s2, &bedroom, &s3, &garage, &s4, &cellar, &s5, 1000);
 
-	shed.uruchamiacz();
+	shed.Starter();
 
 	return 0;
 }
