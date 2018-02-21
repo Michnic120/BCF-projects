@@ -8,7 +8,7 @@ using namespace std;
 
 CKlima::CKlima()
 {
-  iMojStan = 0; //1-włączony 0-wyłączony
+  iMojStan = 0; 
 }
 
 CKlima::~CKlima()
