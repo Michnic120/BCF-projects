@@ -15,13 +15,12 @@ void generator(int t0, int N, float fmax, int rozmiar, float* tabsin, float* tab
   for (i=0; i<rozmiar; i++) tabt[i] = t0 + ( i / (10*(fmax)) )  ;  
 
   for(j=0;j<N; j++)
-  for (i=0; i<rozmiar; i++)
-  {
-    tabsin[i] = tabA[j]*sin((2*M_PI* tabf[j]*tabt[i])+tabphi[j]); tabsuma[i] = tabsuma[i]+tabsin[i]; 
-  }   //  Amplituda * sinus ((2*PI*f*t)+phi)
-
-  szum(tabszum, rozmiar, Asz);
-  for (i=0; i<rozmiar; i++) tabsuma[i]=tabsuma[i]+tabszum[i];
+    for (i=0; i<rozmiar; i++)
+    {
+      tabsin[i] = tabA[j]*sin((2*M_PI* tabf[j]*tabt[i])+tabphi[j]); tabsuma[i] = tabsuma[i]+tabsin[i]; 
+    }   
+    szum(tabszum, rozmiar, Asz);
+    for (i=0; i<rozmiar; i++) tabsuma[i]=tabsuma[i]+tabszum[i];
 }
 
 
@@ -43,7 +42,7 @@ void szum(float *tabszum, int rozmiar, float Asz)
 
   for(i=0; i<ilosc; i++)
   {
-     *(tabsz+i) =(rand()%rozmiar);  // ewentualnie tabszum[i]
+     *(tabsz+i) =(rand()%rozmiar); 
      tabszum[tabsz[i]]=rand();
      if(tabszum[tabsz[i]]>tmp)tmp=tabszum[tabsz[i]];
   }
@@ -58,9 +57,9 @@ void szum(float *tabszum, int rozmiar, float Asz)
 
 void plikzapis(float *tabtf, float *tabsuma, int rozmiar, int p)
 {
-int i;
+  int i;
 
-FILE* plik;
+  FILE* plik;
     if(p==1)plik = fopen("C:\\Users\\Asus\\Desktop\\plik.csv", "w");
     if(p==2)plik = fopen("C:\\Users\\Asus\\Desktop\\fourier.csv", "w");
 
@@ -86,18 +85,24 @@ void plikodczyt(float *tabt, float *tabsuma, int* rozm, float* fmax)
 
   plik = fopen("C:\\Users\\Asus\\Desktop\\plik.csv", "r");
 
-  // liczenie elementów tablicy, zakomentowane wyświetlenie ile  wyliczył
-  for(fscanf(plik, "%f;", &tmp); feof(plik) ==0 ; fscanf(plik, "%f;\n", &tmp))n++;
-  n=0.5*n; rewind(plik);
-  tabt = calloc(n, sizeof(float)); tabsuma = calloc(n, sizeof(float));  //alokacja po policzeniu
+  for(fscanf(plik, "%f;", &tmp); feof(plik) ==0 ; fscanf(plik, "%f;\n", &tmp))
+    n++;
+  
+  n=0.5*n; 
+  rewind(plik);
+  
+  tabt = calloc(n, sizeof(float)); 
+  tabsuma = calloc(n, sizeof(float)); 
 
-  for(i=0; i<n; i++){fscanf(plik, "%f; %f; \n", &tabt[i], &tabsuma[i]); } //wczytanie danych do tablicy
-  for(i=0; i<n; i++)printf("%f; %f;\n", tabt[i], tabsuma[i]);
+  for(i=0; i<n; i++)
+    fscanf(plik, "%f; %f; \n", &tabt[i], &tabsuma[i]);  
+  for(i=0; i<n; i++)
+    printf("%f; %f;\n", tabt[i], tabsuma[i]);
 
   f = n/(tabt[n-1]-tabt[0]);
 
   *fmax = f;
-  *rozm = n;  //przekazanie rozmiaru tablicy do maina
+  *rozm = n; 
   fclose(plik);
 }
 
@@ -108,7 +113,8 @@ void fourier(float *tabsuma, float* tabfourier, float* tabff, int rozmiar,  floa
 
   float tabrefourier[rozmiar],tabimfourier[rozmiar];
 
-  for(i=0;i<rozmiar;i++) tabff[i] = ((i+1)*10*fmax)/rozmiar ;  //wszystkie częstotliwości    od 0 do fmax
+  for(i=0;i<rozmiar;i++) 
+    tabff[i] = ((i+1)*10*fmax)/rozmiar ; 
 
   for(k=0; k<rozmiar; k++)
     {
@@ -117,9 +123,10 @@ void fourier(float *tabsuma, float* tabfourier, float* tabff, int rozmiar,  floa
 
       for(n=0;n<rozmiar;n++)
       {
-      tabrefourier[k] += tabsuma[n]*cos(k*n*2*M_PI/rozmiar);
-      tabimfourier[k] -= tabsuma[n]*sin(k*n*2*M_PI/rozmiar);
+        tabrefourier[k] += tabsuma[n]*cos(k*n*2*M_PI/rozmiar);
+        tabimfourier[k] -= tabsuma[n]*sin(k*n*2*M_PI/rozmiar);
       }
+      
       tabfourier[k] = sqrt((tabrefourier[k]*tabrefourier[k])+(tabimfourier[k]*tabimfourier[k]));
     }
 }
@@ -132,73 +139,75 @@ void hamming(int N)
   ham = ALFA-BETA*((2*M_PI*n)/N);
 }
 
-void fir()
-{
-  /*
-  int M; float fo;
-  printf("podaj rzad filtru");            scanf("%d", &M);
-  printf("podaj czestotliwosc odciecia"); scanf("%f", &fo);
-  */
-}
 
 main()
 {
  int   i,w,rozmiar, rozmiarf, p    ,N;
  float t0,tf;
  float fmax=0,Asz;
- float *tabA,*tabf,*tabphi,   *tabsin,*tabt,*tabszum,*tabsuma,   *tabfourier,*tabff;
+ float *tabA,*tabf,*tabphi,   
+       *tabsin,*tabt,*tabszum,*tabsuma,  
+       *tabfourier,*tabff;
 
- printf("Jesli chcesz generowac sygnal wybierz '1'\nJesli chcesz wczytac plik wybierz '2'\n"); scanf("%d", &w);
+ printf("Jesli chcesz generowac sygnal wybierz '1'\nJesli chcesz wczytac plik wybierz '2'\n"); 
+ scanf("%d", &w);
 
-switch(w)
-{
- case 1:
-    system("cls");
-    printf("Generacja sygnalu.\n\n");
-    printf("Podaj ilosc skladowych: ");     scanf("%d", &N);
-    printf("\nPodaj czas poczatkowy: ");    scanf("%f", &t0);
-    printf("Podaj czas koncowy: ");         scanf("%f", &tf);
+ switch(w)
+ {
+   case 1:
+     system("cls");
+     printf("Generacja sygnalu.\n\n");
+     printf("Podaj ilosc skladowych: ");     
+     scanf("%d", &N);
+     printf("\nPodaj czas poczatkowy: ");   
+     scanf("%f", &t0);
+     printf("Podaj czas koncowy: ");         
+     scanf("%f", &tf);
 
      tabA  =  ustawtablice(tabsin, N);
      tabf  =  ustawtablice(tabf, N);
      tabphi=  ustawtablice(tabphi, N);
 
-    for(i=0;i<N;i++)
-  {
-     printf("\nAmplituda %d: ", i+1);           scanf("%f",   (tabA+i));
-     printf("Czestotliwosc %d: ", i+1);         scanf("%f",   (tabf+i));
-     printf("Kat przesuniecia %d: ", i+1);      scanf("%f", (tabphi+i));
+     for(i=0;i<N;i++)
+     {
+       printf("\nAmplituda %d: ", i+1);           
+       scanf("%f",   (tabA+i));
+       printf("Czestotliwosc %d: ", i+1);         
+       scanf("%f",   (tabf+i));
+       printf("Kat przesuniecia %d: ", i+1);      
+       scanf("%f", (tabphi+i));
 
-     if(fmax<*(tabf+i)) fmax = *(tabf+i);
-  }
+       if(fmax<*(tabf+i)) fmax = *(tabf+i);
+      }
 
-    rozmiar = (tf-t0)*10*(fmax); // zrób z tego funkcję
+     rozmiar = (tf-t0)*10*(fmax); 
 
-    //alokacja wszystkich tablic
-    tabsin =ustawtablice(tabsin, rozmiar);
-    tabt   =ustawtablice(tabt,   rozmiar);
-    tabszum=ustawtablice(tabszum,rozmiar);
-    tabsuma=ustawtablice(tabsuma,rozmiar);
+     tabsin =ustawtablice(tabsin, rozmiar);
+     tabt   =ustawtablice(tabt,   rozmiar);
+     tabszum=ustawtablice(tabszum,rozmiar);
+     tabsuma=ustawtablice(tabsuma,rozmiar);
 
-    printf("\nPodaj amplitude szumu: "); scanf("%f", &Asz);
+     printf("\nPodaj amplitude szumu: "); 
+     scanf("%f", &Asz);
 
- generator(t0, N, fmax, rozmiar, tabsin, tabt, tabszum, tabsuma, Asz, tabA, tabf, tabphi);
+     generator(t0, N, fmax, rozmiar, tabsin, tabt, tabszum, tabsuma, Asz, tabA, tabf, tabphi);
 
-    break;
+     break;
 
- case 2:
-    system("cls");
-    printf("Wczytanie sygnalu z pliku.\n\n");
+   case 2:
+     system("cls");
+     printf("Wczytanie sygnalu z pliku.\n\n");
 
-    plikodczyt(tabt, tabsuma, &rozmiar, &fmax);
+     plikodczyt(tabt, tabsuma, &rozmiar, &fmax);
 
-    break;
+     break;
 
- default:
-    system("cls");
-    printf("Wybierz ponownie:\n\n");
-    main();
-}
+   default:
+     system("cls");
+     printf("Wybierz ponownie:\n\n");
+     
+main();
+{
 
   printf("\n\nWcisnij dowolny przycisk  \n\n");
   getch();
@@ -206,7 +215,6 @@ switch(w)
   printf("czas   sygnal \n");   for(i=0; i<rozmiar; i++) printf("%f  %f\n", tabt[i]=0,tabsuma[i]=0);
   p=1; plikzapis(tabt, tabsuma, rozmiar, p);
 
-   //FOURIER
 
   tabfourier=ustawtablice(tabfourier,rozmiar);
   tabff= ustawtablice(tabff, rozmiar);
