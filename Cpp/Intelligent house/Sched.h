@@ -1,19 +1,19 @@
 #pragma once
-#include "Pokoj.h"
-#include"Sterownik.h"
+#include "Room.h"
+#include "Controller.h"
 
 class CSched
 {
   private:
-    int iCyklCzasu;
+    int iTimeCycle;
 
   public:
-    CPokoj* pokoj1, *pokoj2, *pokoj3, *pokoj4, *pokoj5;
-    CSterownik *st1, *st2, *st3, *st4, *st5;
-    CSched(CPokoj *pokoik1, CSterownik *ster1, CPokoj *pokoik2, CSterownik *ster2, 
-           CPokoj *pokoik3, CSterownik *ster3, CPokoj *pokoik4, CSterownik *ster4, 
-           CPokoj *pokoik5, CSterownik *ster5, int cykl);
+    CRoom* room1, *room2, *room3, *room4, *room5;
+    CController *con1, *con2, *con3, *con4, *con5;
+     CSched(CRoom *rom1, CController *cont1, CRoom *rom2, CController *cont2, 
+            CRoom *rom3, CController *cont3, CRoom *rom4, CController *cont4, 
+            CRoom *rom5, CController *cont5, int cycle)
     ~CSched();
   
-    void uruchamiacz();
+    void Starter();
 };
