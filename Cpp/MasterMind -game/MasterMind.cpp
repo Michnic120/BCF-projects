@@ -16,7 +16,7 @@ int main()
 
   code.reserve(8); guess.reserve(4), hints.reserve(4);
 
- for(int i=0; i<4; i++)
+  for(int i=0; i<4; i++)
   {
     switch(rand() % 6)
     {
@@ -30,18 +30,18 @@ int main()
     }
   }
 
-for(int i=0; i<4; i++)
-    code[i+4] = code[i];
+  for(int i=0; i<4; i++)
+     code[i+4] = code[i];
 
-cout<<endl<<"Enter the color\nr - red\nb - blue\ng - green\ny - yellow\nv - violet\no - orange\n";
+  cout<<endl<<"Enter the color\nr - red\nb - blue\ng - green\ny - yellow\nv - violet\no - orange\n";
 
-while(n<10)
+  while(n<10)
     {
       m=0;
       for(int i=0;i<4;)
        {
-        cin>>c;
-        if(c=='r' || c=='b' || c=='g' || c=='y' || c=='v' || c=='o'){guess[i]=c; i++;}
+         cin>>c;
+         if(c=='r' || c=='b' || c=='g' || c=='y' || c=='v' || c=='o'){guess[i]=c; i++;}
          else cout<<"Wrong color!"<<endl;
        }
 
