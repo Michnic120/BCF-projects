@@ -16,14 +16,19 @@ VOID WINAPI Sleep(DWORD dwMilliseconds);
 CSched::CSched(CPokoj *pokoik1, CSterownik *ster1, CPokoj *pokoik2, CSterownik *ster2, CPokoj *pokoik3, CSterownik *ster3, CPokoj *pokoik4, CSterownik *ster4, CPokoj *pokoik5, CSterownik *ster5, int cykl)
 {
 	iCyklCzasu = cykl;
+	
 	pokoj1 = pokoik1;
 	st1 = ster1;
+	
 	pokoj2 = pokoik2;
 	st2 = ster2;
+	
 	pokoj3 = pokoik3;
 	st3 = ster3;
+	
 	pokoj4 = pokoik4;
 	st4 = ster4;
+	
 	pokoj5 = pokoik5;
 	st5 = ster5;
 }
@@ -53,11 +58,20 @@ void CSched::uruchamiacz()
 			string a;
 			cin >> a;
 
-			if (a == "poddasze+")st1->ZwiekszTemperatur(); if (a == "poddasze-")st1->ZmiejszTemperature();
-			if (a == "salon+")st2->ZwiekszTemperatur(); if (a == "salon-")st2->ZmiejszTemperature();
-			if (a == "sypialnia+")st3->ZwiekszTemperatur(); if (a == "sypialnia-")st3->ZmiejszTemperature();
-			if (a == "garaz+")st4->ZwiekszTemperatur(); if (a == "garaz-")st4->ZmiejszTemperature();
-			if (a == "piwnica+")st5->ZwiekszTemperatur(); if (a == "piwnica-")st5->ZmiejszTemperature();
+			if (a == "poddasze+")st1->ZwiekszTemperatur(); 
+			if (a == "poddasze-")st1->ZmiejszTemperature();
+			
+			if (a == "salon+")st2->ZwiekszTemperatur(); 
+			if (a == "salon-")st2->ZmiejszTemperature();
+			
+			if (a == "sypialnia+")st3->ZwiekszTemperatur(); 
+			if (a == "sypialnia-")st3->ZmiejszTemperature();
+			
+			if (a == "garaz+")st4->ZwiekszTemperatur(); 
+			if (a == "garaz-")st4->ZmiejszTemperature();
+			
+			if (a == "piwnica+")st5->ZwiekszTemperatur(); 
+			if (a == "piwnica-")st5->ZmiejszTemperature();
 
 			if (a == "poddaszeokno+") { pokoj1->plus *= 1.5; cout << "Okno na poddaszu otwarte."; }
 			if (a == "poddaszeokno-") { pokoj1->plus /= 1.5; cout << "Okno na poddaszu zamkniete."; }
