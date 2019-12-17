@@ -1,22 +1,44 @@
-void quicksort(int tab[], int left, int right){
-     int i=left;
-     int j=right;
-     int x=tab[(left+right)>>1];
-     do{
-         while(tab[i]<x) i++;
-         while(tab[j]>x) j--;
-         if(i<=j){                  
-             int temp=tab[i];
-             tab[i]=tab[j];
-             tab[j]=temp;
-             i++;
-             j--;
-         }
-     }while(i<=j);
-     if(left<j) quicksort(tab,left,j);
-     if(right>i) quicksort(tab,i,right);     
+#include<iostream>
+#include<vector>
+
+void quicksort(std::vector<int>& tab, int left, int right)
+{
+    int i=left;
+    int j=right;
+    int x=tab[(left+right)>>1];
+    do
+    {
+        while(tab[i]<x) i++;
+        while(tab[j]>x) j--;
+        if(i<=j)
+        {                  
+            int temp=tab[i];
+            tab[i]=tab[j];
+            tab[j]=temp;
+            i++;
+            j--;
+        }
+    }while(i<=j);
+    
+    if(left<j) quicksort(tab,left,j);
+    if(right>i) quicksort(tab,i,right);     
 }
 
+
+int main()
+{
+    std::vector<int> dupaVec = {40,20,30,50,10};
+    auto dupaSize = dupaVec.size();
+
+    quicksort(dupaVec, 0, dupaSize-1);
+
+    for(auto iter : dupaVec)
+    {
+        std::cout << *iter << "\n";
+    }
+
+    return 0;
+}
 
 
 /*
