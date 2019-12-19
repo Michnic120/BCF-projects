@@ -2,24 +2,26 @@
 #include<vector>
 
 void quicksort(std::vector<int>& tab, int left, int right)
-{
+{   
+    int temp;
     int i=left;
     int j=right;
     int x=tab[(left+right)>>1];
+
     do
     {
         while(tab[i]<x) i++;
         while(tab[j]>x) j--;
         if(i<=j)
         {                  
-            int temp=tab[i];
+            temp=tab[i];
             tab[i]=tab[j];
             tab[j]=temp;
             i++;
             j--;
         }
     }while(i<=j);
-    
+
     if(left<j) quicksort(tab,left,j);
     if(right>i) quicksort(tab,i,right);     
 }
@@ -56,7 +58,7 @@ Potem sortujemy osobno początkową i końcową część
 tablicy. Rekursja kończy się, gdy kolejny fragment uzyskany z podziału zawiera pojedyn-
 czy element, jako że jednoelementowa podtablica jest posortowana. 
 
-Należy zaprojektować
+Należy zaprojektować:
 odpowiedni algorytm podziału na P procesorów/maszyn, opracować program, wykonać te-
 sty i przedstawić analizę wyników. 
 
