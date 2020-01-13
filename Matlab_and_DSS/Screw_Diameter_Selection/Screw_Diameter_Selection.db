@@ -1,0 +1,319 @@
+knowledge base nowy023
+
+facets
+
+  ask     yes;
+  single  yes;
+
+  rodzaj_połączenia :
+     ask     yes
+     single  yes
+     val oneof  
+     { 
+        "śrubowe",
+        "nitowe",
+        "spawane",
+        "lutowane",
+        "zgrzewane",
+        "kołkowe"
+     };
+
+  rodzaj_obciążenia :
+     ask     yes
+     single  yes
+     val oneof  
+     { 
+        "osiowe",
+        "poprzeczne",
+        "mieszane"
+     };
+
+  siła_w_połączeniu :
+     ask     yes
+     single  yes
+     val range  
+        < 0, 10000 >;
+
+  kr :
+     ask     yes
+     single  yes
+     val range  
+        < 0, 3000 >;
+
+  klasa_wytrzymałości_śruby :
+     ask     yes
+     single  yes
+     val oneof  
+     { 
+        "3.6",
+        "4.6",
+        "4.8",
+        "5.6",
+        "5.8",
+        "6.8",
+        "8.8",
+        "9.8",
+        "10.9",
+        "12.9"
+     };
+
+  śruba :
+     ask     yes
+     single  yes
+     val oneof  
+     { 
+        "M5",
+        "M6",
+        "M8",
+        "M10",
+        "M12",
+        "M14"
+     };
+
+  średnica_śruby :
+     ask     yes
+     single  yes
+     val range  
+        < 0, 14 >;
+
+end; // facets
+
+rules
+
+   0001: kr = 84 if
+             klasa_wytrzymałości_śruby = "3.6" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0002: kr = 112 if
+             klasa_wytrzymałości_śruby = "4.6" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0003: kr = 149 if
+             klasa_wytrzymałości_śruby = "4.8" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0004: kr = 140 if
+             klasa_wytrzymałości_śruby = "5.6" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0005: kr = 186 if
+             klasa_wytrzymałości_śruby = "5.8" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0006: kr = 223 if
+             klasa_wytrzymałości_śruby = "6.8" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0007: kr = 260 if
+             klasa_wytrzymałości_śruby = "8.8" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0008: kr = 298 if
+             rodzaj_obciążenia = "osiowe" 
+             & rodzaj_połączenia = "śrubowe" 
+             & klasa_wytrzymałości_śruby = "9.8";
+
+   0009: kr = 419 if
+             klasa_wytrzymałości_śruby = "10.9" 
+             & rodzaj_połączenia = "śrubowe" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0010: kr = 502 if
+             rodzaj_połączenia = "śrubowe" 
+             & klasa_wytrzymałości_śruby = "10.9" 
+             & rodzaj_obciążenia = "osiowe";
+
+   0011: śruba = "M5" if
+             średnica_śruby <= 5;
+
+   0012: śruba = "M6" if
+             średnica_śruby > 5 
+             & średnica_śruby <= 6;
+
+   0013: śruba = "M8" if
+             średnica_śruby > 6 
+             & średnica_śruby <= 8;
+
+   0014: śruba = "M10" if
+             średnica_śruby > 8 
+             & średnica_śruby <= 10;
+
+   0015: śruba = "M12" if
+             średnica_śruby > 10 
+             & średnica_śruby <= 12;
+
+   0016: śruba = "M14" if
+             średnica_śruby > 12 
+             & średnica_śruby <= 14;
+
+
+end; // rules
+
+control
+ run;
+ createAppWindow;
+ setAppWinTitle( "Dobór połączeń części maszyn" );
+
+ menu "Menu"
+1. "Dobierz połączenie śrubowe"
+2. "Wyjście"
+ case 1:
+
+ //dodanie faktu ustalającego wartość atrybutu "rodzaj_połączenia" na wartość "śrubowe"
+ 
+ addFact(_, rodzaj_połączenia, "śrubowe");
+
+ //*************************sekcja ustalania wartości atrybutu "rodzaj_obciążenia" i przechwycenia faktu****************************
+//deklaracja zmiennej "Indeks" przechowującej numer wybranej przez użytkownika opcji udostępnianej przez funkcję slistBox
+ 
+ int Indeks;
+
+ //deklaracja tablicy zmiennych znakowych o 3 elementach, przechowujących możliwe wartości atrybutu "rodzaj_obciążenia"
+ 
+ char RodzajObciążenia[3];
+ RodzajObciążenia[0]:= "osiowe";
+ RodzajObciążenia[1]:= "poprzeczne";
+ RodzajObciążenia[2]:= "mieszane";
+
+ //wywołanie okna wyświetlającego listę wartości zmiennych, przechowywanych w tablicy "RodzajObciążenia"
+//funkcja "slistBox" ustala wartość zmiennej "Indeks" na wskazaną przez użytkownika wartość z wyświetlonej listy
+ 
+ slistBox(0, 0, "Określenie rodzaju obciążenia", "Wybierz rodzaj obciążenia", RodzajObciążenia, 3, Indeks);
+
+ //dodanie faktu "rodzaj_obciążenia" o wartości odpowiadającej elementowi tablicy "RodzajObciążenia" o numerze "Indeks" ustawionym
+ //przez funkcję "slistBox" zgodnie z wyborem użytkownika
+ 
+ addFact(_, rodzaj_obciążenia, RodzajObciążenia[Indeks]);
+
+ //przechtytywanie faktu do wartości zmiennej "FaktRodzajObciążenia"
+ //deklaracja zmiennej znakowej przekazanej jako pierwszy argument funkcji "catchFact"
+ 
+ char FaktRodzajObciążenia;
+
+ //sprawdzenie czy istnieje fakt "rodzaj_obciążenia=osiowe" jeśli istnieje zostanie zachowany jako wartość
+//zmiennej "FaktRodzajObciążenia", w przeciwnym wypadku zmienna ta pozostanie pusta ("")
+ 
+ catchFact(FaktRodzajObciążenia, _, "rodzaj_obciążenia","osiowe", 0);
+
+//***********************sekcja ustalania wartości atrybutu "siła_w_połączeniu", dodanie faktu ************************************
+ //jeżeli zmienna FaktRodzajObciążenia nie jest pusta (jeśli istnieje fakt "rodzaj_obciążenia=osiowe")
+ //to wykonaj ciąg instrukcji
+ 
+ if (FaktRodzajObciążenia <> "")
+ begin
+
+ //deklaracja zmiennej "Siła" typu numerycznego, zmiennoprzecinkowego przechowującej wartość osiowego obciążenia połączenia śrubowego
+ 
+ float Siła;
+ neditBox(0, 0, 0, 10000, "Podaj wartość siły w połączeniu w Newtonach", Siła);
+ addFact(_, siła_w_połączeniu, Siła);
+
+//********************sekcja ustalania wartości atrybutu "klasa_wytrzymałości_śruby", dodanie faktu ******************************
+//deklaracja tablicy zmiennych typu znakowego o 10 elementach w celu przechowywania możliwych wartości klasy wytrzymałości śruby
+ 
+ char Śruby[10];
+
+ //przypisanie wartości do kolejnych elementów tablicy
+ 
+ Śruby[0]:= "3.6";
+ Śruby[1]:= "4.6";
+ Śruby[2]:= "4.8";
+ Śruby[3]:= "5.6";
+ Śruby[4]:= "5.8";
+ Śruby[5]:= "6.8";
+ Śruby[6]:= "8.8";
+ Śruby[7]:= "9.8";
+ Śruby[8]:= "10.9";
+ Śruby[9]:= "12.9";
+
+//wywołanie okna wyświetlającego listę wartości zmiennych przechowywanych w tablicy "Śruby"
+ //funkcja "slistBox" ustala wartość zmiennej "Indeks" na wskazaną przez użytkownika wartość z wyświetlonej listy
+ 
+ slistBox(0,0,"Przykład slistBox","Wybierz klasę wytrzymałości śruby",Śruby,10, Indeks);
+
+ //dodanie faktu ustalającego wartość atrybutu "klasa_wytrzymałości_śruby"
+ //argument "Śruby[Indeks]" funkcji "addFact" reprezentuje wartość
+ //tablicy "Śruby" o numerze odpowiadającej zmiennej "Indeks"
+ 
+ addFact(_, klasa_wytrzymałości_śruby, Śruby[Indeks]);
+ 
+ //*************sekcja ustalania wartości atrybutu współczynnik "kr", zapis wyniku wnioskowania jako wartości zmiennej ************
+ //wyłączenie wyświetlania okna zawierającego rozwiązanie problemu
+ 
+ solutionWin (no);
+ 
+ //wywołanie wnioskowania potrzebnego do ustalenia wartości współczynnika "kr"
+ 
+ goal("kr=X");
+
+//włączenie wyświetlania okna zawierającego rozwiązanie problemu
+ 
+ solutionWin (yes);
+ 
+ //deklaracja zmiennej tablicowej o 1 elemencie "Rozwiązanie" do przechowywania wyniku wnioskowania dotyczącego współczynnika "kr"
+ 
+ char Rozwiązanie[1];
+ int LicznikRozwiązań;
+
+ //instrukcja "saveSolution" zapisuje rozwiązanie w tablicy "Rozwiązanie" jako wartość zmiennej "LicznikRozwiązań"
+ 
+ saveSolution(Rozwiązanie, LicznikRozwiązań);
+
+ char Obiekt, Atrybut, Wartość;
+ 
+ //"splitOAV": podział zmiennej tekstowej (element o numerze "0" z tablicy "Rozwiązanie"), reprezentującej rozwiązanie
+ //na obiekt, atrybut i wartość, zapis do zmiennych o nazwach: "Obiekt","Atrybut","Wartość"
+ 
+ splitOAV(Rozwiązanie[0], Obiekt,Atrybut,Wartość);
+
+ //"ston": konwersja zmiennej tekstowej "Wartość" na zmienną numeryczną całkowitą "Kr"
+ 
+ int Kr;
+ ston(Wartość, Kr);
+
+//********************sekcja obliczeń wytrzymałości połączenia śrubowego, dodanie faktu "średnica_śruby"************************
+ //deklaracja zmiennych typu numerycznego zmiennoprzecinkowego "Średnica_śruby" i "Pierwiastek"
+ 
+ 
+ float ŚrednicaŚruby, Pierwiastek;
+
+ //obliczenia wytrzymałościowe zmierzające do ustalenia minimalnej średnicy śruby o określonej klasie wytrzymałości
+  //i założonej sile w połączeniu
+ //przypisanie do zmiennej "Pierwiastek" wyniku obliczeń matematycznych
+ 
+ Pierwiastek :=(Siła * 4) / (Kr * 3.14);
+
+ // Przypisanie do zmiennej "ŚrednicaŚruby" wyniku obliczenia pierwiastka kwadratowego z ustalonej
+ // w poprzednim kroku wartości zmiennej "Pierwiastek" poprzez funkcję "sqrt"
+ 
+ ŚrednicaŚruby := sqrt(Pierwiastek);
+
+ //dodanie faktu ustalającego wartość atrybutu "średnica_śruby"
+ 
+ addFact(_, średnica_śruby, ŚrednicaŚruby);
+
+ //********************sekcja wnioskowania ostatecznego ustalającego średnicę śruby metrycznej do połączenia**********************
+ //wywołanie wnioskowania dobierającego średnicę śruby metrycznej do połączenia
+ 
+ goal("śruba = X");
+ delNewFacts;
+ end;
+
+
+ case 2:
+
+ exit; // zamknięcie aplikacji
+
+ end;
+
+ end
+;
+
+end; // knowledge base

@@ -3,7 +3,7 @@
 #include<algorithm>
 #include<numeric>
 #include<ctime>
-#include<omp.h>
+
 
 void swap(int* a, int* b)
 {
@@ -30,7 +30,7 @@ int partition(std::vector<int>& vec, int l, int h)
     return (i + 1);
 }
 
-void quicksortIterative(std::vector<int>& vec, int l, int h)
+void quicksortIterative(std::vector<int> vec, int l, int h)
 {
     int stack[h - l + 1];
     int top = -1;
@@ -59,124 +59,55 @@ void quicksortIterative(std::vector<int>& vec, int l, int h)
     }
 }
 
-/*1. podzielenie pivota pomiędzy wątki
-2. wykonanie operacji quicksortu
-3. zrobić jakiś swap czy coś miedzy częściami
-4. zamiast synchronizacji wątków to
-    - wykonanie procedury równolegle
-    - cośtam cośtam
-    - wykonanie następnej procedury równolegle*/
-
-
-
-
-/*
-przystosowanie funckji sortiterative, żebu przyjmowała
-na wejsciu coś w stylu vec.begin(), vec.end() i pivot jako wartość do której będzie potem porównywał i dzielił
-
-*/
-
-int partitionParallel(std::vector<int>& vec, int l, int pivot)
-{
-    int i = l - 1;
-    int h = vec.size() - 1;
-
-    for (int j = l; j <= h - 1; j++) // range based loop ?
-    {
-        if (vec[j] <= pivot)
-        {
-            i++;
-            swap(&vec[i], &vec[j]);
-        }
-    }
-    swap(&vec[i + 1], &vec[h]);
-    return i + 1;
-}
-
-std::pair<std::vector<int>, std::vector<int>> quicksortParallelHalve(std::vector<int>::iterator first, std::vector<int>::iterator last, int pivot)
-{
-    std::vector<int> vec(first, last);
-    int l = 0;
-    int p = partition(vec, l, vec.size() -1 ); //pivot);
-
-    std::vector<int> vec1(vec.begin(), vec.begin() + p - 1);
-    std::vector<int> vec2(vec.begin() + p - 1, vec.end());
-
-    quicksortIterative(vec1, l, vec1.size() - 1);
-    quicksortIterative(vec2, l, vec2.size() - 1);
-
-    return std::make_pair(vec1, vec2);
-}
-
 void quicksortParallel(std::vector<int> vec)
 {
-    int mid = (vec.size() - 1) / 2;
-    int pivot = vec[mid]; // do tego maja porównywać pozostałe
+    int num_threads = 4;
+    int div = vec.size() / num_threads;
+    std::vector<std::vector<int>> vecVec;
 
-    // int threads = 2;
-
-    std::vector<int> vec1(vec.begin(), vec.begin() + mid);
-    std::vector<int> vec2(vec.begin() + mid + 1, vec.end());
-
-    std::vector<std::pair<std::vector<int>, std::vector<int>>> vecPair;
-
-    // for(int i = 0; i > 2; i++)
-    // {
-
-    // }
-
-    quicksortIterative(vec, 0 , vec.size()-1);
-
-    // #pragma omp parallel sections //private(pivot, mid)
-    // {
-    //     #pragma omp section
-    //     {
-    //         quicksortIterative(vec, 0 , vec.size()-1);
-    //         // vecPair.push_back(quicksortParallelHalve(vec1.begin(), vec1.end(), pivot));
-    //     }
-    //     // #pragma omp section
-    //     // {
-    //     //     quicksortIterative(vec, mid + 1, vec.size()-1);
-    //     //     // quicksortParallelHalve(vec2.begin(), vec2.end(), pivot);
-    //     // }
-    // }
-
-    // pętla for ktora będzie sterować ilością wywoływanych sekcji -
-    // zmienna sterująca pętli na podstawie ilości sczytanych wątkow
-
-    /*rezultat sortowania wrzucasz do mapy, identyfikator na podstawie ID wątku
-            map<pair<vector, vector>>
-            1. vector - mniejszy od pivota
-            2. vector - większy od pivota
-
-    */
-
-    for (auto iter : vec)
+    for(int i = 0; i < num_threads; i++)
     {
-        std::cout << iter << " ";
+        vecVec.emplace_back(vec.begin() + div*i, vec.begin() + div*(i+1));
     }
 
-//     for (auto iter : vecPair[0].first)
-//     {
-//         std::cout << iter << " ";
-//     }
-//     std::cout << " 111111";
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            quicksortIterative(vecVec[0], 0, vecVec[0].size() - 1);
+        }
+        #pragma omp section
+        {
+            quicksortIterative(vecVec[1], 0, vecVec[1].size() - 1);
+        }
 
-//     for (auto iter : vecPair[0].second)
-//     {
-//         std::cout << iter << " ";
-//     }
+        #pragma omp section
+        {
+            quicksortIterative(vecVec[2], 0, vecVec[2].size() - 1);
+        }
+        #pragma omp section
+        {
+            quicksortIterative(vecVec[3], 0, vecVec[3].size() - 1);
+        }
+    }
+
+    std::vector<int> temp1(vec.size()/2, 0), temp2(vec.size()/2, 0);
+
+    std::merge(vecVec[0].begin(),  vecVec[0].end(),  vecVec[1].begin(),  vecVec[1].end(),  temp1.begin());
+    std::merge(vecVec[2].begin(),  vecVec[2].end(),  vecVec[3].begin(),  vecVec[3].end(),  temp2.begin());
+    std::merge(temp1.begin(), temp1.end(), temp2.begin(), temp2.end(), vec.begin());
 }
 
 double timeSum(const std::vector<double>& timeVec, const int& n)
 {
-    return std::accumulate(timeVec.begin(), timeVec.end(), 0.0000) / (CLOCKS_PER_SEC * n);
+    return std::accumulate(
+        timeVec.begin(), timeVec.end(), 0.0000) / (CLOCKS_PER_SEC * n);
 }
 
 int main()
 {
-    const int n = 1, size = 20, m = 1000  ;  // int max = 2147483647
-    std::vector<double> clock1(n), clock3(n), clock5(n);
+    const int n = 50, size = 2500, m = 524288;  // int max = 2147483647
+    std::vector<double> clock1(n), clock2(n);
     std::vector<int> vec(size);
 
     std::generate(vec.begin(), vec.end(), []() {return rand() % m;});
@@ -189,58 +120,32 @@ int main()
         clock1[i] = clock() - clock1[i];
     }
 
-
-    std::cout << "Posortowane : " << n;
-    std::cout << "\n";
-    for (auto iter : vec1)
+    for(int i = 0; i < n; i++)
     {
-        std::cout << iter << " ";
+        clock2[i] = clock();
+        quicksortParallel(vec);
+        clock2[i] = clock() - clock2[i];
     }
-    std::cout << "\n";
 
-
-    // for(int i = 0; i != n; i++)
-    // {
-    //     clock3[i] = clock();
-    //     quicksortIterative(vec, 0, vec.size() - 1);
-    //     clock3[i] = clock() - clock3[i];
-
-    //     for (auto iter : vec)
-    //     {
-    //         std::cout << iter << " ";
-    //     }
-    // }
-
-
-
-        quicksortIterative(vec, 0, vec.size() - 1);
-
-        for (auto iter : vec)
-        {
-            std::cout << iter << " ";
-        }
-
-
-
-
+    // std::cout << "\nPosortowane : ";
     // std::cout << "\n";
-    // for(int i = 0; i < n; i++) // zostaw do testowania innych rozwiązań
+    // for (auto iter : vec1)
     // {
-    //     clock5[i] = clock();
-    //     quicksortParallel(vec);
-    //     clock5[i] = clock() - clock5[i];
+    //     std::cout << iter << " ";
     // }
+    // std::cout << "\n";
 
     // for (auto iter : vec)
     // {
     //     std::cout << iter << " ";
     // }
+    // std::cout << "\n\n";
+
 
     std::cout << "Ilość powtórzeń: " << n;
 
     std::cout << "\n1. std::sort         : "<< timeSum(clock1, n)
-              << "\n3. pętla for_opt     : "<< timeSum(clock3, n)
-              << "\n5. for_opt parallel  : "<< timeSum(clock5, n) << "\n";
+              << "\n2. for_opt parallel  : "<< timeSum(clock2, n) << "\n";
 
     // std::cout << "Liczba procków : " << omp_get_thread_limit() << "\n ";
 
