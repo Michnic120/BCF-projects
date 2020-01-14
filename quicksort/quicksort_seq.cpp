@@ -3,6 +3,7 @@
 #include<algorithm>
 #include<numeric>
 #include<ctime>
+#include<stack>
 
 double timeSum(const std::vector<double>& timeVec, const int& n)
 {
@@ -67,63 +68,62 @@ void quicksortFor(std::vector<int> vec, int l, int h)
     }
 }
 
-void quicksortForOpt(std::vector<int> vec, int l, int h)
+void quicksortForOpt(std::vector<int>& vec, int l, int h)
 {
-    int stack[h - l + 1];
-    int top = -1;
+    std::stack<int> stack;
 
-    stack[++top] = l;
-    stack[++top] = h;
+    stack.push(l);
+    stack.push(h);
 
-    while (top >= 0)
+    while (!stack.empty())
     {
-        h = stack[top--];
-        l = stack[top--];
+        h = stack.top(); stack.pop();
+        l = stack.top(); stack.pop();
 
         int p = partition(vec, l, h);
 
         if (p - 1 > l)
         {
-            stack[++top] = l;
-            stack[++top] = p - 1;
+            stack.push(l);
+            stack.push(p - 1);
         }
 
         if (p + 1 < h)
         {
-            stack[++top] = p + 1;
-            stack[++top] = h;
+            stack.push(p + 1);
+            stack.push(h);
         }
     }
 }
 
 int main()
 {
-    const int n = 50, s = 500, m = 1024;
+    const int n = 1, s = 10, m = 1024;
     std::vector<double> clock1(n), clock2(n), clock3(n), clock4(n);
     std::vector<int> vec(s);
     std::generate(vec.begin(), vec.end(), []() {return rand() % m;});
     auto vec1(vec);
 
-    for(int i = 0; i != n; i++)
-    {
-        clock1[i] = clock();
-        std::sort(vec1.begin(), vec1.end());
-        clock1[i] = clock() - clock1[i];
-    }
+    // for(int i = 0; i != n; i++)
+    // {
+    //     clock1[i] = clock();
+    //     std::sort(vec1.begin(), vec1.end());
+    //     clock1[i] = clock() - clock1[i];
+    // }
 
-    for(int i = 0; i != n; i++)
-    {
-        clock2[i] = clock();
-        quicksortWhile(vec, 0, vec.size() - 1);
-        clock2[i] = clock() - clock2[i];
-    }
+    // for(int i = 0; i != n; i++)
+    // {
+    //     clock2[i] = clock();
+    //     quicksortWhile(vec, 0, vec.size() - 1);
+    //     clock2[i] = clock() - clock2[i];
+    // }
 
-    for(int i = 0; i != n; i++)
-    {
-        clock3[i] = clock();
-        quicksortFor(vec, 0, vec.size() - 1);
-        clock3[i] = clock() - clock3[i];
-    }
+    // for(int i = 0; i != n; i++)
+    // {
+    //     clock3[i] = clock();
+    //     quicksortFor(vec, 0, vec.size() - 1);
+    //     clock3[i] = clock() - clock3[i];
+    // }
 
     for(int i = 0; i != n; i++)
     {
@@ -132,10 +132,17 @@ int main()
         clock4[i] = clock() - clock4[i];
     }
 
+    std::cout << "\n after sort: \n";
+    for (auto iter : vec)
+    {
+        std::cout << iter << " ";
+    }
+    std::cout << "\n\n";
+
     std::cout << "\nIlość powtórzeń: " << n;
-    std::cout << "\n1. std::sort                 : "<< timeSum(clock1, n);
-    std::cout << "\n2. pętla while               : "<< timeSum(clock2, n);
-    std::cout << "\n3. pętla for                 : "<< timeSum(clock3, n);
+    // std::cout << "\n1. std::sort                 : "<< timeSum(clock1, n);
+    // std::cout << "\n2. pętla while               : "<< timeSum(clock2, n);
+    // std::cout << "\n3. pętla for                 : "<< timeSum(clock3, n);
     std::cout << "\n4. pętla for zoptymalizowana : "<< timeSum(clock4, n) << "\n";
 
     return 0;

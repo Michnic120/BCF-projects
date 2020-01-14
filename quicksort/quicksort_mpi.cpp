@@ -1,8 +1,9 @@
 #include<algorithm>
 #include<iostream>
 #include<numeric>
-#include<vector>
 #include<queue>
+#include<stack>
+#include<vector>
 
 #include<cmath>
 #include<ctime>
@@ -13,6 +14,7 @@
 #define I_END(vecSize, myRank, numOfProc)   (vecSize*(myRank+1)/numOfProc)
 
 using itVec = std::vector<int>::iterator;
+
 
 inline double timeSum(const std::vector<double>& timeVec, const int& n)
 {
@@ -26,10 +28,10 @@ inline void swap(int* a, int* b)
     *b = temp;
 }
 
-int getMedian(int vecSize, itVec begin, itVec end)
-{
-    return 1;
-}
+// int getMedian(int vecSize, itVec begin, itVec end)
+// {
+//     return 1;
+// }
 
 struct mmdata
 {
@@ -96,29 +98,27 @@ int partition(std::vector<int>& vec, int l, int h)
 
 void quicksortForOpt(std::vector<int> vec, int l, int h)
 {
-    int stack[h - l + 1];
-    int top = -1;
+    std::stack<int> stack;
+    stack.push(l);
+    stack.push(h);
 
-    stack[++top] = l;
-    stack[++top] = h;
-
-    while (top >= 0)
+    while (!stack.empty())
     {
-        h = stack[top--];
-        l = stack[top--];
+        h = stack.top(); stack.pop();
+        l = stack.top(); stack.pop();
 
         int p = partition(vec, l, h);
 
         if (p - 1 > l)
         {
-            stack[++top] = l;
-            stack[++top] = p - 1;
+            stack.push(l);
+            stack.push(p - 1);
         }
 
         if (p + 1 < h)
         {
-            stack[++top] = p + 1;
-            stack[++top] = h;
+            stack.push(p + 1);
+            stack.push(h);
         }
     }
 }
@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
     }
 
 
-    std::vector<unsigned long> privots(numOfProc-1);
+    std::vector<int> privots(numOfProc-1);
 
     if(myRank == 0)
     {
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
         std::cout << "\n";
     }
 
-    MPI_Bcast(privots.data(), numOfProc, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    MPI_Bcast(privots.data(), numOfProc, MPI_INT, 0, MPI_COMM_WORLD);
 
 
     // sortowanie fragmentów tablic przez każdy proces na podstawie n pivotów
@@ -252,8 +252,7 @@ int main(int argc, char* argv[])
         }
         std::cout << "\n";
 
-
-        for (int i = 0; i < privots.size(); i++)
+        for (unsigned int i = 0; i < privots.size(); i++)
         {
             std::cout << "\ndevided rank 0: iteration no.:" << i <<"\n"
                       << "privot: " << privots[i] << " \n\n";
@@ -270,10 +269,8 @@ int main(int argc, char* argv[])
                      break;
                 }
             }
-
             std::cout << "\n";
         }
-
     }
 
 
