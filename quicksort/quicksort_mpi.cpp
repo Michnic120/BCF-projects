@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
     if(myRank == 0)
     {
         std::cout << "\n all regular samples before sorting : \n";
-        for (auto iter : gatherRegSam)
+        for (const auto& iter : gatherRegSam)
         {
             std::cout << iter << " ";
         }
@@ -215,8 +215,11 @@ int main(int argc, char* argv[])
     {
         for (int i = 0; i < numOfProc-1; i++)
         {
-            privots[i] = gatherRegSam[(i+1)*numOfProc];
+            privots[i] = 106;//gatherRegSam[(i+1)*numOfProc];
         }
+
+        privots.push_back(115);
+
 
         std::cout << "\n all the privots : \n";
         for (auto iter : privots)
@@ -234,6 +237,44 @@ int main(int argc, char* argv[])
     // 1. mamy posortowane tablice już
     // 2. trzeba znaleźć gdzie można wcisnąć te pivoty
     // 3. po znalezieniu można podzielić tablicę na P tablic
+
+
+// wyświetlenie elementów mniejszych od podanego pivota wszystkich
+// wyświetlenie elementów mniejszych od podanego pivota tylko dla tego procesu
+    // od danych pivotów
+
+    if(myRank == 0)
+    {
+        std::cout << "\n full rank 0: \n";
+        for (itVec j = iterBegin; j != iterEnd; j++)
+        {
+            std::cout << *j << " ";
+        }
+        std::cout << "\n";
+
+
+        for (int i = 0; i < privots.size(); i++)
+        {
+            std::cout << "\ndevided rank 0: iteration no.:" << i <<"\n"
+                      << "privot: " << privots[i] << " \n\n";
+            for (itVec j = iterBegin; j != iterEnd; j++)
+            {
+                if(*j <= privots[i])
+                {
+                    std::cout << *j << " ";
+                }
+                else
+                {
+                     std::cout << "\n\n" << *j << " ";
+                     iterBegin = j;
+                     break;
+                }
+            }
+
+            std::cout << "\n";
+        }
+
+    }
 
 
     // std::cout << "\n after sort: \n";
