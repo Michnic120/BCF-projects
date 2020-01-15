@@ -245,6 +245,9 @@ int main(int argc, char* argv[])
 
     if(myRank == 0)
     {
+        int pSize = privots.size();
+        std::vector<std::vector<int>> vecVec(pSize);
+
         std::cout << "\n full rank 0: \n";
         for (itVec j = iterBegin; j != iterEnd; j++)
         {
@@ -252,7 +255,7 @@ int main(int argc, char* argv[])
         }
         std::cout << "\n";
 
-        for (unsigned int i = 0; i < privots.size(); i++)
+        for (int i = 0; i < pSize; i++)
         {
             std::cout << "\ndevided rank 0: iteration no.:" << i <<"\n"
                       << "privot: " << privots[i] << " \n\n";
@@ -260,14 +263,23 @@ int main(int argc, char* argv[])
             {
                 if(*j <= privots[i])
                 {
-                    std::cout << *j << " ";
+                    vecVec[i].push_back(*j);
                 }
+
                 else
                 {
-                     std::cout << "\n\n" << *j << " ";
-                     iterBegin = j;
-                     break;
+                    std::cout << "\n\n ostatni większy element ";
+                    std::cout << "\n" << *j << " ";
+                    iterBegin = j;
+                    break;
                 }
+
+                /* if (j == pSize-1)
+                    {
+                        reszta vectora do vecVec
+                    }
+
+                    */
             }
             std::cout << "\n";
         }
