@@ -28,11 +28,6 @@ inline void swap(int* a, int* b)
     *b = temp;
 }
 
-// int getMedian(int vecSize, itVec begin, itVec end)
-// {
-//     return 1;
-// }
-
 struct mmdata
 {
     int stindex;
@@ -125,10 +120,10 @@ void quicksortForOpt(std::vector<int> vec, int l, int h)
 
 int main(int argc, char* argv[])
 {
-    const int  n = 10, size = 10, m = 1024;
+    const int size = 20, m = 1024;  // n = 10
     int numOfProc, myRank;
 
-    std::vector<double> clock1(n);
+    // std::vector<double> clock1(n);
     std::vector<int> vec(size);
     std::generate(vec.begin(), vec.end(), []() {return rand() % m;});
 
@@ -137,14 +132,17 @@ int main(int argc, char* argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &numOfProc);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    int indexBegin = I_BEGIN(size, myRank, numOfProc);
-    int indexEnd = I_END(size, myRank, numOfProc);
-
-    itVec iterBegin = vec.begin() + indexBegin;
-    itVec iterEnd   = vec.begin() + indexEnd;
+    if (myRank == 0 && size < pow(numOfProc, 2))
+    { 
+        std::cout << "Warunek początkowy niespełniony! ";
+        return 0;
+    }
+    
 
     if (myRank == 0)
     {
+        std::cout << "Ilość wątków: " << numOfProc << "\n" ;
+
         std::cout << "\n general before sort: \n";
         for (auto iter : vec)
         {
@@ -153,7 +151,19 @@ int main(int argc, char* argv[])
         std::cout << "\n\n";
     }
 
+
+    int indexBegin = I_BEGIN(size, myRank, numOfProc);
+    int indexEnd = I_END(size, myRank, numOfProc);
+
+    itVec iterBegin = vec.begin() + indexBegin;
+    itVec iterEnd   = vec.begin() + indexEnd;
+
+    std::vector<int> regularSamples(numOfProc);
+    std::vector<int> gatherRegSam;
+    std::vector<int> privots(numOfProc-1);
+
     std::sort(iterBegin, iterEnd);
+
 
     std::cout << "\n after "<< myRank <<" process sort: \n";
     for (auto iter : vec)
@@ -163,30 +173,20 @@ int main(int argc, char* argv[])
     std::cout << "\n\n";
 
 
-    std::vector<unsigned long> regularSamples(numOfProc);
-
-
+    std::cout << "\n regular sample of process: " << myRank << " \n";
     for(int i = 0; i < numOfProc; i++)
     {
-        regularSamples[i] = vec[i*size / pow(numOfProc, 2)];
-
-        std::cout << "\n regular sample of process: " << myRank << " \n";
+        regularSamples[i] = *(iterBegin + (i * size / pow(numOfProc, 2)));
         std::cout << regularSamples[i] << "  ";
     }
     std::cout << "\n\n";
 
-
-    std::vector<unsigned long> gatherRegSam;
     if(myRank == 0)
     {
         gatherRegSam.resize(pow(numOfProc, 2));
     }
 
-
-    MPI_Gather(
-        regularSamples.data(), numOfProc, MPI_UNSIGNED_LONG,
-        gatherRegSam.data(), numOfProc, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
-
+    MPI_Gather(regularSamples.data(), numOfProc, MPI_INT, gatherRegSam.data(), numOfProc, MPI_INT, 0, MPI_COMM_WORLD);
 
     if(myRank == 0)
     {
@@ -196,7 +196,6 @@ int main(int argc, char* argv[])
             std::cout << iter << " ";
         }
         std::cout << "\n";
-
 
         std::sort(gatherRegSam.begin(), gatherRegSam.end());
 
@@ -208,18 +207,12 @@ int main(int argc, char* argv[])
         std::cout << "\n";
     }
 
-
-    std::vector<int> privots(numOfProc-1);
-
     if(myRank == 0)
     {
         for (int i = 0; i < numOfProc-1; i++)
         {
-            privots[i] = 106;//gatherRegSam[(i+1)*numOfProc];
+            privots[i] = gatherRegSam[(i+1)*numOfProc];
         }
-
-        privots.push_back(115);
-
 
         std::cout << "\n all the privots : \n";
         for (auto iter : privots)
@@ -231,59 +224,100 @@ int main(int argc, char* argv[])
 
     MPI_Bcast(privots.data(), numOfProc, MPI_INT, 0, MPI_COMM_WORLD);
 
-
-    // sortowanie fragmentów tablic przez każdy proces na podstawie n pivotów
-
-    // 1. mamy posortowane tablice już
-    // 2. trzeba znaleźć gdzie można wcisnąć te pivoty
-    // 3. po znalezieniu można podzielić tablicę na P tablic
-
-
-// wyświetlenie elementów mniejszych od podanego pivota wszystkich
-// wyświetlenie elementów mniejszych od podanego pivota tylko dla tego procesu
-    // od danych pivotów
-
-    if(myRank == 0)
+    if(myRank == 2)
     {
         int pSize = privots.size();
-        std::vector<std::vector<int>> vecVec(pSize);
+        std::vector<std::vector<int>> vecVec(numOfProc);
 
         std::cout << "\n full rank 0: \n";
         for (itVec j = iterBegin; j != iterEnd; j++)
         {
             std::cout << *j << " ";
         }
+        
         std::cout << "\n";
+
+        {  // zamknięcie zakresu, żeby iterDupa mógł zniknąć
+        auto iterTemp = iterBegin ; 
+        // dzięki temu będzie można zachować iterBegin na późniejsze sortowanie
 
         for (int i = 0; i < pSize; i++)
         {
-            std::cout << "\ndevided rank 0: iteration no.:" << i <<"\n"
+            std::cout << "\ndivided rank 0: iteration no.:" << i <<"\n"
                       << "privot: " << privots[i] << " \n\n";
-            for (itVec j = iterBegin; j != iterEnd; j++)
+
+            
+
+
+            for (itVec j = iterTemp; j != iterEnd; j++)
             {
                 if(*j <= privots[i])
                 {
                     vecVec[i].push_back(*j);
                 }
-
                 else
                 {
-                    std::cout << "\n\n ostatni większy element ";
-                    std::cout << "\n" << *j << " ";
-                    iterBegin = j;
+                    std::cout << "\n ostatni większy element " << *j << " ";
+                    iterTemp = j;
                     break;
                 }
-
-                /* if (j == pSize-1)
-                    {
-                        reszta vectora do vecVec
-                    }
-
-                    */
             }
-            std::cout << "\n";
+
+            if (i == pSize-1)
+            {
+                for (itVec j = iterTemp; j != iterEnd; j++)
+                {
+                    std::cout << "\n wszystkie elemnenty ostatniego vectora: " << *j << " ";
+                    vecVec[i+1].push_back(*j);
+                }
+            }
+
+          }
+        std::cout << "\n";
         }
+
+        std::cout << "\n wszystkie elemnenty ze wszystkich vectorów" ;
+        int vSize = vecVec.size();
+        for(int i = 0; i != vSize; i++)
+        {
+            std::cout << "\n";
+            for(itVec j = vecVec[i].begin(); j != vecVec[i].end(); j++)
+            {
+                std::cout << *j << " "; 
+            }
+        }
+        std::cout << "\n";
     }
+    
+
+    // mamy już dane odzielone na podstawie wszystkich privotów 
+    // teraz czas na przesłanie ich na zasadzie:
+
+    //1.  do procesu n wysyłany jest vecVec[n] (all-to-all communication)
+
+        // int *recvRankPartLen = new int[comm_sz];
+    // MPI_Alltoall(partLength, 1, MPI_INT, recvRankPartLen, 1, MPI_INT, MPI_COMM_WORLD);
+
+    // unsigned long *recvPartData = new unsigned long[rankPartLenSum];
+    // MPI_Alltoallv(myData, partLength, partStartIndex, MPI_UNSIGNED_LONG,
+    //                 recvPartData, recvRankPartLen, rankPartStart, MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
+
+    // 2. merge wszystkich elementów vecVec do tempVec 
+    
+    // std::vector<int> tempVec;
+    
+    // int vSize = vecVec.size();
+    // for(int i = 0; i != vSize; i++)
+    // {
+    //      tempVec.insert(tempVec.end(), vecVec[i].begin(), vecVec[i].end());
+    // }
+   
+
+    //3. każdy z procesów po otrzymaniu swojego przydziału sortuje elementy
+        
+    // std::sort(tempVec.begin(), tempVec.end());
+
+
 
 
     // std::cout << "\n after sort: \n";
@@ -294,6 +328,7 @@ int main(int argc, char* argv[])
     // std::cout << "\n\n";
     // std::cout << "\n Ilość powtórzeń: " << n << " ID: " << myRank
     //           << "\nnum of processes: " << numOfProc << "\n" ;
+
 
     MPI_Finalize();
     return 0;
