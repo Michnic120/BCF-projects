@@ -133,11 +133,11 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     if (myRank == 0 && size < pow(numOfProc, 2))
-    { 
+    {
         std::cout << "Warunek początkowy niespełniony! ";
         return 0;
     }
-    
+
 
     if (myRank == 0)
     {
@@ -161,6 +161,9 @@ int main(int argc, char* argv[])
     std::vector<int> regularSamples(numOfProc);
     std::vector<int> gatherRegSam;
     std::vector<int> privots(numOfProc-1);
+
+    int pSize = privots.size();
+    std::vector<std::vector<int>> vecVec(numOfProc), recvVecVec(numOfProc);
 
     std::sort(iterBegin, iterEnd);
 
@@ -226,19 +229,18 @@ int main(int argc, char* argv[])
 
     if(myRank == 2)
     {
-        int pSize = privots.size();
-        std::vector<std::vector<int>> vecVec(numOfProc);
+
 
         std::cout << "\n full rank 0: \n";
         for (itVec j = iterBegin; j != iterEnd; j++)
         {
             std::cout << *j << " ";
         }
-        
+
         std::cout << "\n";
 
         {  // zamknięcie zakresu, żeby iterDupa mógł zniknąć
-        auto iterTemp = iterBegin ; 
+        auto iterTemp = iterBegin ;
         // dzięki temu będzie można zachować iterBegin na późniejsze sortowanie
 
         for (int i = 0; i < pSize; i++)
@@ -246,7 +248,7 @@ int main(int argc, char* argv[])
             std::cout << "\ndivided rank 0: iteration no.:" << i <<"\n"
                       << "privot: " << privots[i] << " \n\n";
 
-            
+
 
 
             for (itVec j = iterTemp; j != iterEnd; j++)
@@ -283,38 +285,57 @@ int main(int argc, char* argv[])
             std::cout << "\n";
             for(itVec j = vecVec[i].begin(); j != vecVec[i].end(); j++)
             {
-                std::cout << *j << " "; 
+                std::cout << *j << " ";
             }
         }
         std::cout << "\n";
     }
-    
 
-    // mamy już dane odzielone na podstawie wszystkich privotów 
+
+    // mamy już dane odzielone na podstawie wszystkich privotów
     // teraz czas na przesłanie ich na zasadzie:
 
     //1.  do procesu n wysyłany jest vecVec[n] (all-to-all communication)
 
-        // int *recvRankPartLen = new int[comm_sz];
-    // MPI_Alltoall(partLength, 1, MPI_INT, recvRankPartLen, 1, MPI_INT, MPI_COMM_WORLD);
+/*
+
+    MPI_Alltoallv(
+                    myData,         vecVec.data()
+                    partLength,     vecVec.size()
+                    partStartIndex, vecVec[1].data()
+
+
+                    MPI_INT,
+
+
+                    recvPartData,   recvVecVec.data()
+                    recvRankPartLen, recvVecVec.size()
+                    rankPartStart,  recvVecVec[1].data()
+
+
+                    MPI_INT,
+                    MPI_COMM_WORLD);
+
+*/
+
 
     // unsigned long *recvPartData = new unsigned long[rankPartLenSum];
     // MPI_Alltoallv(myData, partLength, partStartIndex, MPI_UNSIGNED_LONG,
     //                 recvPartData, recvRankPartLen, rankPartStart, MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
 
-    // 2. merge wszystkich elementów vecVec do tempVec 
-    
+    // 2. merge wszystkich elementów vecVec do tempVec
+
     // std::vector<int> tempVec;
-    
+
     // int vSize = vecVec.size();
     // for(int i = 0; i != vSize; i++)
     // {
     //      tempVec.insert(tempVec.end(), vecVec[i].begin(), vecVec[i].end());
     // }
-   
+
 
     //3. każdy z procesów po otrzymaniu swojego przydziału sortuje elementy
-        
+
     // std::sort(tempVec.begin(), tempVec.end());
 
 
@@ -333,3 +354,57 @@ int main(int argc, char* argv[])
     MPI_Finalize();
     return 0;
 }
+
+
+
+/*
+
+int MPIAPI MPI_Alltoallv(
+  _In_  void         *sendbuf,
+  _In_  int          *sendcounts,
+  _In_  int          *sdispls,
+        MPI_Datatype sendtype,
+  _Out_ void         *recvbuf,
+  _In_  int          *recvcounts,
+  _In_  int          *rdispls,
+        MPI_Datatype recvtype,
+        MPI_Comm     comm
+);
+
+Parameters
+
+    sendbuf [in]
+    The pointer to the data to be sent to all processes in the group. The number and data type of the elements in the buffer are specified in the sendcount and sendtype parameters. Each element in the buffer corresponds to a process in the group.
+
+    If the comm parameter references an intracommunicator, you can specify an in-place option by specifying MPI_IN_PLACE in all processes. The sendcount, sdispls and sendtype parameters are ignored. Each process enters data in the corresponding receive buffer element.
+
+    Data that are sent and received must have the same type map as specified by the recvcounts array and the recvtype parameter. Data is read from the locations of the receive buffer that is specified by the rdispls parameter.
+
+    sendcounts [in]
+    The number of data elements that this process sends in the buffer that is specified in the sendbuf parameter. If an element insendcount is zero, the data part of the message from that process is empty.
+
+    sdispls [in]
+    The location, relative to the sendbuf parameter, of the data for each communicator process.
+
+    Entry j specifies the displacement relative to the sendbuf parameter from which to take the outgoing data that is destined for process j.
+
+    sendtype
+    The MPI data type of the elements in the send buffer.
+
+    recvbuf [out]
+    The pointer to a buffer that contains the data that are received from each process. The number and data type of the elements in the buffer are specified in the recvcount and recvtype parameters.
+
+    recvcounts [in]
+    The number of data elements from each communicator process in the receive buffer.
+
+    rdispls [in]
+    The location, relative to the recvbuf parameter, of the data from each communicator process.
+
+    In the recvbuf, recvcounts, and rdispls parameter arrays, the nth element of each array refers to the data that is received from the nth communicator process.
+
+    recvtype
+    The MPI data type of each element in buffer.
+
+    comm
+    Specifies the MPI_Comm communicator handle.*/
+
