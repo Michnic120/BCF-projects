@@ -1,7 +1,6 @@
 #include<algorithm>
 #include<iostream>
 #include<numeric>
-#include<queue>
 #include<stack>
 #include<vector>
 
@@ -27,49 +26,6 @@ inline void swap(int* a, int* b)
     *a = *b;
     *b = temp;
 }
-
-struct mmdata
-{
-    int stindex;
-    int index;
-    unsigned long stvalue;
-
-    mmdata(int st=0, int id=0, unsigned long stv = 0):stindex(st),index(id),stvalue(stv){}
-};
-
-bool operator<(const mmdata & One, const mmdata & Two)
-{
-    return One.stvalue > Two.stvalue;
-}
-
-void multiple_merge(unsigned long* starts[], const std::vector<int>& lengths,
-                    const int Number, unsigned long newArray[], const int newArrayLength)
-{
-    std::priority_queue<mmdata> priorities;
-
-    for(int i = 0; i < Number; i++)
-    {
-        if (lengths[i] > 0)
-        {
-            priorities.push(mmdata(i,0,starts[i][0]));
-        }
-    }
-
-    int newArrayindex = 0;
-    while (!priorities.empty() && (newArrayindex < newArrayLength))
-    {
-        mmdata xxx = priorities.top();
-        priorities.pop();
-
-        newArray[newArrayindex++] = starts[xxx.stindex][xxx.index];
-
-        if (lengths[xxx.stindex]>(xxx.index+1))
-        {
-            priorities.push(mmdata(xxx.stindex, xxx.index+1, starts[xxx.stindex][xxx.index+1]));
-        }
-    }
-}
-
 
 int partition(std::vector<int>& vec, int l, int h)
 {
@@ -165,6 +121,12 @@ int main(int argc, char* argv[])
     int pSize = privots.size();
     std::vector<std::vector<int>> vecVec(numOfProc), recvVecVec(numOfProc);
 
+    std::vector<int> sendLength(numOfProc);
+    std::vector<int> sendIndex(numOfProc); 
+    std::vector<int> recvLength(numOfProc);
+    std::vector<int> recvIndex(numOfProc);
+
+
     std::sort(iterBegin, iterEnd);
 
 
@@ -227,29 +189,42 @@ int main(int argc, char* argv[])
 
     MPI_Bcast(privots.data(), numOfProc, MPI_INT, 0, MPI_COMM_WORLD);
 
-    if(myRank == 2)
+
+
+
+
+
+
+
+    int dupsko = 1;
+
+
+
+
+
+
+
+
+    if(myRank == dupsko)
     {
-
-
-        std::cout << "\n full rank 0: \n";
+        std::cout << "\n full rank " << myRank << ": \n";
         for (itVec j = iterBegin; j != iterEnd; j++)
         {
             std::cout << *j << " ";
         }
-
         std::cout << "\n";
-
-        {  // zamknięcie zakresu, żeby iterDupa mógł zniknąć
+    }
+    
+    {
         auto iterTemp = iterBegin ;
-        // dzięki temu będzie można zachować iterBegin na późniejsze sortowanie
 
         for (int i = 0; i < pSize; i++)
         {
-            std::cout << "\ndivided rank 0: iteration no.:" << i <<"\n"
-                      << "privot: " << privots[i] << " \n\n";
-
-
-
+            if(myRank == dupsko)
+            {   
+                std::cout << "\n\ndivided rank " << dupsko << ": iteration no.:" << i 
+                          << "\n\tprivot: " << privots[i] << " \n";
+            }
 
             for (itVec j = iterTemp; j != iterEnd; j++)
             {
@@ -259,69 +234,138 @@ int main(int argc, char* argv[])
                 }
                 else
                 {
-                    std::cout << "\n ostatni większy element " << *j << " ";
+                    if(myRank == dupsko) std::cout << "\tostatni większy element " << *j << " ";
                     iterTemp = j;
                     break;
                 }
             }
 
             if (i == pSize-1)
-            {
+            {   
                 for (itVec j = iterTemp; j != iterEnd; j++)
                 {
-                    std::cout << "\n wszystkie elemnenty ostatniego vectora: " << *j << " ";
                     vecVec[i+1].push_back(*j);
                 }
             }
-
-          }
-        std::cout << "\n";
         }
+        std::cout << "\n"; 
+    }
 
+    if(myRank == dupsko)
+    {
         std::cout << "\n wszystkie elemnenty ze wszystkich vectorów" ;
         int vSize = vecVec.size();
         for(int i = 0; i != vSize; i++)
         {
-            std::cout << "\n";
+            std::cout << "\n\t";
             for(itVec j = vecVec[i].begin(); j != vecVec[i].end(); j++)
             {
                 std::cout << *j << " ";
             }
         }
-        std::cout << "\n";
     }
 
-
-    // mamy już dane odzielone na podstawie wszystkich privotów
-    // teraz czas na przesłanie ich na zasadzie:
-
-    //1.  do procesu n wysyłany jest vecVec[n] (all-to-all communication)
+    for(auto i = 0u; i < vecVec.size(); i++)
+    {   
+        sendLength[i] = vecVec[i].size();
+        if(i == 0)
+        {
+            sendIndex[i] = 0;
+        }
+        else
+        {
+            sendIndex[i] = sendIndex[i-1] + sendLength[i-1];
+        }
+    }
 
 /*
 
-    MPI_Alltoallv(
-                    myData,         vecVec.data()
-                    partLength,     vecVec.size()
-                    partStartIndex, vecVec[1].data()
-
-
-                    MPI_INT,
-
-
-                    recvPartData,   recvVecVec.data()
-                    recvRankPartLen, recvVecVec.size()
-                    rankPartStart,  recvVecVec[1].data()
-
-
-                    MPI_INT,
-                    MPI_COMM_WORLD);
-
+    int rankPartLenSum = 0;
+    int *rankPartStart = new int[comm_sz];
+    for(int i=0; i<comm_sz; i++)
+    {
+        rankPartStart[i] = rankPartLenSum;
+        rankPartLenSum += recvRankPartLen[i];
+    }
 */
 
 
-    // unsigned long *recvPartData = new unsigned long[rankPartLenSum];
-    // MPI_Alltoallv(myData, partLength, partStartIndex, MPI_UNSIGNED_LONG,
-    //                 recvPartData, recvRankPartLen, rankPartStart, MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
+    std::cout << "\n";
+
+    std::cout << "\n\nwyświetlenie rozmiaru każdego z fragmentów tablicy dla procesu "<< myRank <<": \n";
+    for(auto iter : sendLength)
+    {   
+        std::cout << iter << " ";
+    }
+    std::cout << "\n";
+
+
+    std::cout << "\n\nwyświetlenie indeksu przesunięcia każdego z fragmentów tablicy dla procesu "<< myRank <<": \n";
+    for(auto iter : sendIndex)
+    {   
+        std::cout << iter << " ";
+    }
+    std::cout << "\n";
+
+
+    MPI_Alltoall(sendLength.data(), 1, MPI_INT,
+                 recvLength.data(), 1, MPI_INT,
+                 MPI_COMM_WORLD);
+
+    if(myRank == dupsko)
+    {
+        std::cout << "\n\nwyświetlenie otrzymanych długości każdego z fragmentów tablicy dla procesu "<< myRank <<": \n";
+        for (auto iter : recvLength)
+        {
+            std::cout << iter << " ";
+        }
+        std::cout << "\n\n";
+    }
+
+    // // tu jeszcze trzeba pokminić
+    // // Odbierz tablicę i segmentów dla każdego procesu
+    // int *recvPartData = new int[rankPartLenSum];
+
+
+    // MPI_Alltoallv(vecVec.data(),
+    //             sendIndex.data(),  sendLength.data(),
+    //             MPI_INT,
+
+
+    //             recvPartData,
+
+    //      /*       recvVecVec.data(),*/
+    //             recvIndex.data(),  recvLength.data(),
+    //             MPI_INT,
+    //             MPI_COMM_WORLD);
+
+
+
+
+
+
+    // if(myRank == 0)
+    // {   
+
+    //     std::cout << "\n chuj wie:  \n";
+    //     int vSize = recvVecVec.size();
+    //     for(int i = 0; i != vSize; i++)
+    //     {
+    //         std::cout << "\n";
+    //         for(itVec j = vecVec[i].begin(); j != vecVec[i].end(); j++)
+    //         {
+    //             std::cout << *j << " ";
+    //         }
+    //     }
+    //     std::cout << "\n";  
+    // }
+
+
+
+
+
+
+
 
     // 2. merge wszystkich elementów vecVec do tempVec
 
@@ -354,57 +398,3 @@ int main(int argc, char* argv[])
     MPI_Finalize();
     return 0;
 }
-
-
-
-/*
-
-int MPIAPI MPI_Alltoallv(
-  _In_  void         *sendbuf,
-  _In_  int          *sendcounts,
-  _In_  int          *sdispls,
-        MPI_Datatype sendtype,
-  _Out_ void         *recvbuf,
-  _In_  int          *recvcounts,
-  _In_  int          *rdispls,
-        MPI_Datatype recvtype,
-        MPI_Comm     comm
-);
-
-Parameters
-
-    sendbuf [in]
-    The pointer to the data to be sent to all processes in the group. The number and data type of the elements in the buffer are specified in the sendcount and sendtype parameters. Each element in the buffer corresponds to a process in the group.
-
-    If the comm parameter references an intracommunicator, you can specify an in-place option by specifying MPI_IN_PLACE in all processes. The sendcount, sdispls and sendtype parameters are ignored. Each process enters data in the corresponding receive buffer element.
-
-    Data that are sent and received must have the same type map as specified by the recvcounts array and the recvtype parameter. Data is read from the locations of the receive buffer that is specified by the rdispls parameter.
-
-    sendcounts [in]
-    The number of data elements that this process sends in the buffer that is specified in the sendbuf parameter. If an element insendcount is zero, the data part of the message from that process is empty.
-
-    sdispls [in]
-    The location, relative to the sendbuf parameter, of the data for each communicator process.
-
-    Entry j specifies the displacement relative to the sendbuf parameter from which to take the outgoing data that is destined for process j.
-
-    sendtype
-    The MPI data type of the elements in the send buffer.
-
-    recvbuf [out]
-    The pointer to a buffer that contains the data that are received from each process. The number and data type of the elements in the buffer are specified in the recvcount and recvtype parameters.
-
-    recvcounts [in]
-    The number of data elements from each communicator process in the receive buffer.
-
-    rdispls [in]
-    The location, relative to the recvbuf parameter, of the data from each communicator process.
-
-    In the recvbuf, recvcounts, and rdispls parameter arrays, the nth element of each array refers to the data that is received from the nth communicator process.
-
-    recvtype
-    The MPI data type of each element in buffer.
-
-    comm
-    Specifies the MPI_Comm communicator handle.*/
-
