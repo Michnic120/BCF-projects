@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &numOfProc);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    if (myRank == 0 && size < pow(numOfProc, 2))
+/*    if (myRank == 0 && (size < pow(numOfProc, 2) || numOfProc == 1))
     {
         std::cout << "Warunek początkowy niespełniony! ";
         return 0;
@@ -119,10 +119,11 @@ int main(int argc, char* argv[])
     std::vector<int> privots(numOfProc-1);
 
     int pSize = privots.size();
-    std::vector<std::vector<int>> vecVec(numOfProc), recvVecVec(numOfProc);
+    std::vector<std::vector<int>> vecVec(numOfProc);
+
 
     std::vector<int> sendLength(numOfProc);
-    std::vector<int> sendIndex(numOfProc); 
+    std::vector<int> sendIndex(numOfProc);
     std::vector<int> recvLength(numOfProc);
     std::vector<int> recvIndex(numOfProc);
 
@@ -196,7 +197,7 @@ int main(int argc, char* argv[])
 
 
 
-    int dupsko = 1;
+    int dupsko = 0;
 
 
 
@@ -214,15 +215,15 @@ int main(int argc, char* argv[])
         }
         std::cout << "\n";
     }
-    
+
     {
         auto iterTemp = iterBegin ;
 
         for (int i = 0; i < pSize; i++)
         {
             if(myRank == dupsko)
-            {   
-                std::cout << "\n\ndivided rank " << dupsko << ": iteration no.:" << i 
+            {
+                std::cout << "\n\ndivided rank " << dupsko << ": iteration no.:" << i
                           << "\n\tprivot: " << privots[i] << " \n";
             }
 
@@ -241,32 +242,32 @@ int main(int argc, char* argv[])
             }
 
             if (i == pSize-1)
-            {   
+            {
                 for (itVec j = iterTemp; j != iterEnd; j++)
                 {
                     vecVec[i+1].push_back(*j);
                 }
             }
         }
-        std::cout << "\n"; 
+        std::cout << "\n";
     }
 
-    if(myRank == dupsko)
-    {
-        std::cout << "\n wszystkie elemnenty ze wszystkich vectorów" ;
+
+        std::cout << "\n wszystkie elementy z vectorów dla rank: " << myRank ;
         int vSize = vecVec.size();
+        std::cout << "\n\t";
         for(int i = 0; i != vSize; i++)
         {
-            std::cout << "\n\t";
             for(itVec j = vecVec[i].begin(); j != vecVec[i].end(); j++)
             {
                 std::cout << *j << " ";
             }
+            std::cout << " || ";
         }
-    }
+
 
     for(auto i = 0u; i < vecVec.size(); i++)
-    {   
+    {
         sendLength[i] = vecVec[i].size();
         if(i == 0)
         {
@@ -274,27 +275,16 @@ int main(int argc, char* argv[])
         }
         else
         {
-            sendIndex[i] = sendIndex[i-1] + sendLength[i-1];
+            sendIndex[i] += sendLength[i-1];
         }
     }
-
-/*
-
-    int rankPartLenSum = 0;
-    int *rankPartStart = new int[comm_sz];
-    for(int i=0; i<comm_sz; i++)
-    {
-        rankPartStart[i] = rankPartLenSum;
-        rankPartLenSum += recvRankPartLen[i];
-    }
-*/
 
 
     std::cout << "\n";
 
     std::cout << "\n\nwyświetlenie rozmiaru każdego z fragmentów tablicy dla procesu "<< myRank <<": \n";
     for(auto iter : sendLength)
-    {   
+    {
         std::cout << iter << " ";
     }
     std::cout << "\n";
@@ -302,7 +292,7 @@ int main(int argc, char* argv[])
 
     std::cout << "\n\nwyświetlenie indeksu przesunięcia każdego z fragmentów tablicy dla procesu "<< myRank <<": \n";
     for(auto iter : sendIndex)
-    {   
+    {
         std::cout << iter << " ";
     }
     std::cout << "\n";
@@ -312,31 +302,47 @@ int main(int argc, char* argv[])
                  recvLength.data(), 1, MPI_INT,
                  MPI_COMM_WORLD);
 
-    if(myRank == dupsko)
-    {
+
+    std::cout << "\n\n dla procesu "<< myRank <<": \n";
+    // for(auto i = 0u; i < recvLength.size(); i++)
+    // {
+    //     std::vector<int> temp(recvLength[i]);
+    //     // emplace_back
+    //     recvVec.push_back(temp); //recvLength[i]);
+    //     std::cout << "\n\t Wielkosc recvecVec[" << i << "]: " << recvVec[i].size();
+    // }
+
+          auto sum = std::accumulate(recvLength.begin(), recvLength.end(), 0);
+             std::vector<int> recvVec(sum);
+          // recvVec.reserve(sum);
+
+
+
+    // int *recvPartData = new int[sum];
+
+
+
+          std::cout << "\n suma recvLength: " << sum;
+          std::cout << "\n\t Wielkosc recvec: " << recvVec.size();
+
+
+
+        std::cout << "\n\n";
+
+    // if(myRank == dupsko)
+    // {
         std::cout << "\n\nwyświetlenie otrzymanych długości każdego z fragmentów tablicy dla procesu "<< myRank <<": \n";
         for (auto iter : recvLength)
         {
             std::cout << iter << " ";
         }
         std::cout << "\n\n";
-    }
+    // // }
 
-    // // tu jeszcze trzeba pokminić
-    // // Odbierz tablicę i segmentów dla każdego procesu
-    // int *recvPartData = new int[rankPartLenSum];
+*/
 
-
-    // MPI_Alltoallv(vecVec.data(),
-    //             sendIndex.data(),  sendLength.data(),
-    //             MPI_INT,
-
-
-    //             recvPartData,
-
-    //      /*       recvVecVec.data(),*/
-    //             recvIndex.data(),  recvLength.data(),
-    //             MPI_INT,
+    // MPI_Alltoallv(vecVec.data(), sendIndex.data(),  sendLength.data(), MPI_INT,
+    //              recvPartData, recvIndex.data(),  recvLength.data(), MPI_INT,
     //             MPI_COMM_WORLD);
 
 
@@ -344,8 +350,107 @@ int main(int argc, char* argv[])
 
 
 
+
+
+
+
+
+
+
+
+std::vector<int> vecvecdupa;
+if(myRank == 0)
+{
+    vecvecdupa = {1,2};
+}
+else if(myRank == 1)
+{
+    vecvecdupa = {2,1};
+
+}
+std::vector<int> dupaDataRec(2);
+
+
+std::vector<int> sendDupaL = {1,1}, sendDupaI = {1,1};
+std::vector<int> rDupaL = {1,1}, rDupaI = {1,1};
+
+
+    MPI_Alltoallv(vecvecdupa.data(), sendDupaI.data(),  sendDupaL.data(), MPI_INT,
+                  dupaDataRec.data(), rDupaI.data(),  rDupaL.data(), MPI_INT,
+                MPI_COMM_WORLD);
+
+
+
+if(myRank == 0)
+{
+   std::cout << "pierwszy element: " << dupaDataRec[0] << " drugi element: " << dupaDataRec[1] ;
+}
+
+
+
+
+
+
+
+
+//     // Odbierz tablicę i segmentów dla każdego procesu
+//     int recvPartData[2];
+//     int myData[2];
+
+// if(myRank == 0)
+// {
+//     myData[0] = 1;
+//     myData[1] = 2;
+// }
+// else if(myRank == 1)
+// {
+//     myData[0] = 2;
+//     myData[1] = 1;
+
+// }
+
+
+
+// int sendDupaL[2], sendDupaI[2], rDupaL[2], rDupaI[2];
+
+
+
+
+//     sendDupaL[0] = 1;
+//     sendDupaL[1] = 1;
+//     sendDupaI[0] = 1;
+//     sendDupaI[1] = 1;
+//     rDupaL[0] = 1;
+//     rDupaL[1] = 1;
+//     rDupaI[0] = 1;
+//     rDupaI[1] = 1;
+
+
+
+
+
+//     MPI_Alltoallv(myData, sendDupaI,  sendDupaL, MPI_INT,
+//                   recvPartData, rDupaI,  rDupaL, MPI_INT,
+//                 MPI_COMM_WORLD);
+
+
+
+    // MPI_Alltoallv(myData, partLength, partStartIndex, MPI_UNSIGNED_LONG,
+    //                 recvPartData, recvRankPartLen, rankPartStart, MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
+
+
+
+
+
+
+
+
+
+
+
+
     // if(myRank == 0)
-    // {   
+    // {
 
     //     std::cout << "\n chuj wie:  \n";
     //     int vSize = recvVecVec.size();
@@ -357,7 +462,7 @@ int main(int argc, char* argv[])
     //             std::cout << *j << " ";
     //         }
     //     }
-    //     std::cout << "\n";  
+    //     std::cout << "\n";
     // }
 
 
