@@ -23,7 +23,7 @@ inline double timeSum(const std::vector<double>& timeVec, const int& n)
 
 int main(int argc, char* argv[])
 {
-    const int n = 1, size = 1700, m = 1024;
+    const int n = 1, size = 17000, m = 10000; //1024;
     int numOfProc, myRank;
 
     std::vector<double> clock1(n);
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     int indexBegin = I_BEGIN(size, myRank, numOfProc);
     int indexEnd = I_END(size, myRank, numOfProc);
     const int root = 0;
-
+    int tego = root;
     itVec iterBegin = vec.begin() + indexBegin;
     itVec iterEnd   = vec.begin() + indexEnd;
 
@@ -70,8 +70,6 @@ int main(int argc, char* argv[])
     std::vector<int> partVec(iterBegin, iterEnd);
     std::vector<int> gatherRegSam;
 
-    for (int i = 0; i < n; i++)
-    {
         int lenSum = 0;
         clock1[0] = MPI_Wtime();
 
@@ -97,12 +95,12 @@ int main(int argc, char* argv[])
         }
 
 
-        std::cout << "\n regularSamples: \n\t";
-            for (const auto& iter : regularSamples)
-            {
-                 std::cout << iter << " ";
-            }
-        std::cout  << "\n" ;
+        // std::cout << "\n regularSamples: \n\t";
+        //     for (const auto& iter : regularSamples)
+        //     {
+        //          std::cout << iter << " ";
+        //     }
+        // std::cout  << "\n" ;
 
 
 
@@ -147,6 +145,7 @@ int main(int argc, char* argv[])
         sendLength[numOfProc-1] = partVec.size() - j;
 
 
+
         MPI_Alltoall(sendLength.data(), 1, MPI_INT,
                      recvLength.data(), 1, MPI_INT,
                      MPI_COMM_WORLD);
@@ -163,6 +162,7 @@ int main(int argc, char* argv[])
         MPI_Alltoallv(partVec.data(), sendLength.data(), sendIndex.data(), MPI_INT,
                      recvVec.data(), recvLength.data(), recvIndex.data(), MPI_INT,
                     MPI_COMM_WORLD);
+
 
 
         std::sort(recvVec.begin(), recvVec.end());
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
         //     }
 
         // }
-    }
+
 
     if (myRank == root)
     {
