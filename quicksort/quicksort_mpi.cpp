@@ -23,13 +23,12 @@ inline double timeSum(const std::vector<double>& timeVec, const int& n)
 
 int main(int argc, char* argv[])
 {
-    const int n = 1, size = 17000, m = 10000; //1024;
+    const int size = 20, m = 1000; //1024;
     int numOfProc, myRank;
 
-    std::vector<double> clock1(n);
+    double clock1;
     std::vector<int> vec(size);
     std::generate(vec.begin(), vec.end(), []() {return rand() % m;});
-
 
     MPI_Init(&argc, &argv);
 
@@ -56,7 +55,8 @@ int main(int argc, char* argv[])
     int indexBegin = I_BEGIN(size, myRank, numOfProc);
     int indexEnd = I_END(size, myRank, numOfProc);
     const int root = 0;
-    int tego = root;
+    int lenSum = 0;
+
     itVec iterBegin = vec.begin() + indexBegin;
     itVec iterEnd   = vec.begin() + indexEnd;
 
@@ -70,124 +70,107 @@ int main(int argc, char* argv[])
     std::vector<int> partVec(iterBegin, iterEnd);
     std::vector<int> gatherRegSam;
 
-        int lenSum = 0;
-        clock1[0] = MPI_Wtime();
+    clock1 = MPI_Wtime();
 
-        std::sort(partVec.begin(), partVec.end());
+    std::sort(partVec.begin(), partVec.end());
 
-        if (size <= 1500)
-        {
-            for (int i = 0; i < numOfProc; i++)
-            {
-                regularSamples[i] = *(iterBegin + (i * size / pow(numOfProc, 2))-1);
+ 
+    for (int i = 0; i < numOfProc; i++)
+    {
+        regularSamples[i] = *(iterBegin + (i * size / pow(numOfProc, 2)));
 
-
-                std::cout << "\n\ti : " << *(iterBegin + (i * size / pow(numOfProc, 2))-1);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < numOfProc; i++)
-            {
-                regularSamples[i] = *(iterBegin + i);
-
-            }
-        }
+        if (myRank == root) std::cout << "\n\tregularSamples : " << regularSamples[i] ;
+    }
+   
+ 
+    if (myRank == root)
+    {
+        gatherRegSam.resize(pow(numOfProc, 2));
+    }
 
 
-        // std::cout << "\n regularSamples: \n\t";
-        //     for (const auto& iter : regularSamples)
-        //     {
-        //          std::cout << iter << " ";
-        //     }
-        // std::cout  << "\n" ;
-
-
-
-        if (myRank == root)
-        {
-            gatherRegSam.resize(pow(numOfProc, 2));
-        }
-
-
-        MPI_Gather(regularSamples.data(), numOfProc, MPI_INT,
-                gatherRegSam.data(), numOfProc, MPI_INT, root,
-                MPI_COMM_WORLD);
-
-
-        if (myRank == root)
-        {
-            std::sort(gatherRegSam.begin(), gatherRegSam.end());
-
-            for (int i = 0; i < numOfProc-1; i++)
-            {
-                privots[i] = gatherRegSam[(i+1)*numOfProc];
-            }
-        }
-
-
-        MPI_Bcast(privots.data(), numOfProc, MPI_INT, root, MPI_COMM_WORLD);
-
-
-        auto j = 0u;
-        for (int i = 0; i<numOfProc-1; i++)
-        {
-            sendIndex[i] = j;
-            sendLength[i] = 0;
-
-            while((j < partVec.size()) && (partVec[j] <= privots[i]))
-            {
-                j++;
-                sendLength[i]++;
-            }
-        }
-        sendIndex[numOfProc-1] = j;
-        sendLength[numOfProc-1] = partVec.size() - j;
-
-
-
-        MPI_Alltoall(sendLength.data(), 1, MPI_INT,
-                     recvLength.data(), 1, MPI_INT,
-                     MPI_COMM_WORLD);
-
-
-        for (int i = 0; i < numOfProc; i++)
-        {
-            recvIndex[i] = lenSum;
-            lenSum += recvLength[i];
-        }
-        std::vector<int> recvVec(lenSum);
-
-
-        MPI_Alltoallv(partVec.data(), sendLength.data(), sendIndex.data(), MPI_INT,
-                     recvVec.data(), recvLength.data(), recvIndex.data(), MPI_INT,
-                    MPI_COMM_WORLD);
-
-
-
-        std::sort(recvVec.begin(), recvVec.end());
-
-
-        MPI_Gather(recvVec.data(), lenSum, MPI_INT,
-                gatherVec.data(), lenSum, MPI_INT, root,
-                MPI_COMM_WORLD);
-
-        clock1[0] = MPI_Wtime() - clock1[0];
-
-        // if (myRank == root && i == 0)
-        // {
-        //     std::cout << "\n Gathered after sort: \n\t";
-        //     for (const auto& iter : gatherVec)
-        //     {
-        //          std::cout << iter << " ";
-        //     }
-
-        // }
+    MPI_Gather(regularSamples.data(), numOfProc, MPI_INT,
+            gatherRegSam.data(), numOfProc, MPI_INT, root,
+            MPI_COMM_WORLD);
 
 
     if (myRank == root)
     {
-        std::cout << " Tp: " << timeSum(clock1, n) << "\n";
+        std::sort(gatherRegSam.begin(), gatherRegSam.end());
+
+        for (int i = 0; i < numOfProc-1; i++)
+        {
+            privots[i] = gatherRegSam[(i+1)*numOfProc];
+        }
+    }
+
+
+    MPI_Bcast(privots.data(), numOfProc, MPI_INT, root, MPI_COMM_WORLD);
+
+
+    auto j = 0u;
+    for (int i = 0; i<numOfProc-1; i++)
+    {
+        sendIndex[i] = j;
+        sendLength[i] = 0;
+
+        while((j < partVec.size()) && (partVec[j] <= privots[i]))
+        {
+            j++;
+            sendLength[i]++;
+        }
+    }
+    sendIndex[numOfProc-1] = j;
+    sendLength[numOfProc-1] = partVec.size() - j;
+
+
+
+    MPI_Alltoall(sendLength.data(), 1, MPI_INT,
+                 recvLength.data(), 1, MPI_INT,
+                 MPI_COMM_WORLD);
+
+
+    for (int i = 0; i < numOfProc; i++)
+    {
+        recvIndex[i] = lenSum;
+        lenSum += recvLength[i];
+    }
+    std::vector<int> recvVec(lenSum);
+
+
+    MPI_Alltoallv(partVec.data(), sendLength.data(), sendIndex.data(), MPI_INT,
+                 recvVec.data(), recvLength.data(), recvIndex.data(), MPI_INT,
+                MPI_COMM_WORLD);
+
+
+
+    std::sort(recvVec.begin(), recvVec.end());
+
+
+
+
+    MPI_Gather(recvVec.data(), lenSum, MPI_INT,
+            gatherVec.data(), lenSum, MPI_INT, root,
+            MPI_COMM_WORLD);
+
+
+
+    clock1 = MPI_Wtime() - clock1;
+
+    // if (myRank == root && i == 0)
+    // {
+    //     std::cout << "\n Gathered after sort: \n\t";
+    //     for (const auto& iter : gatherVec)
+    //     {
+    //          std::cout << iter << " ";
+    //     }
+
+    // }
+
+
+    if (myRank == root)
+    {
+        std::cout << "\n Tp: " << clock1 << "\n";
     }
 
     MPI_Finalize();
