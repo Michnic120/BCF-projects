@@ -178,12 +178,12 @@ int main()
         clock5[i] = clock() - clock5[i];
     }
 
-    std::cout << "\nIlość powtórzeń: " << n;
-    std::cout << "\n1. std::sort               : "<< timeSum(clock1, n);
-    std::cout << "\n2. pętla while             : "<< timeSum(clock2, n);
-    std::cout << "\n3. pętla for               : "<< timeSum(clock3, n);
-    std::cout << "\n4. pętla for_opt           : "<< timeSum(clock4, n) << "\n";
-    std::cout << "\n5. pętla for_opt parallel  : "<< timeSum(clock5, n) << "\n";
+    std::cout << "\n Repetition number: " << n;
+    std::cout << "\n1. std::sort                    : "<< timeSum(clock1, n);
+    std::cout << "\n2. while loop                   : "<< timeSum(clock2, n);
+    std::cout << "\n3. for loop                     : "<< timeSum(clock3, n);
+    std::cout << "\n4. for loop optimized           : "<< timeSum(clock4, n) << "\n";
+    std::cout << "\n5. for loop optimized, parallel : "<< timeSum(clock5, n) << "\n";
 
     return 0;
 }
