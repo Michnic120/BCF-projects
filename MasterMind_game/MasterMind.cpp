@@ -4,18 +4,18 @@
 #include <ctime>
 #include <cstdlib>
 
-using namespace std;
+std::vector<char>
 
 int main()
 {
   srand( time( NULL ) );
 
-  vector<char> code(8), guess(4), hints(4);
-  vector<bool> hintBool(4,0);
+  std::vector<char> code(8), guess(4), hints(4);
+  std::vector<bool> hintBool(4,0);
   int m, g, n = 0;
   char c;
 
-  for(int i=0; i<4; i++)
+  for(int i = 0; i < 4; i++) // czemu code ma rozmiar 8 ???
   {
     switch(rand() % 6)
     {
@@ -29,7 +29,9 @@ int main()
   }
 
   for(int i = 0; i < 4; i++)
-     code[i+4] = code[i];
+  {
+    code[i+4] = code[i];
+  }
 
   cout << "\nEnter the color\nr - red\nb - blue\ng - green\ny - yellow\nv - violet\no - orange\n";
 

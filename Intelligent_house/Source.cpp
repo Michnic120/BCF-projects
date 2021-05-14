@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include <string>
 #include <iostream>
 #include <vector>
@@ -30,7 +29,7 @@ int main()
             room_buffer.number = i;
             rooms.push_back(room_buffer);
         }
-        
+
 
 	cout  << "Set the temperature in every room" << endl<<endl;
 	cout  << "Attic:  "; cin >> tem[0];
